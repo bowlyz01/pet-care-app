@@ -1,0 +1,8 @@
+Follow these steps to successfully run this project:
+- go to https://console.firebase.google.com and create a new project
+- enable email/password auth provider in authentication section
+- create a web app and copy the configs to config/firebase.js file
+- run "npm install"
+- run "npm run start"
+
+Enjoy 😉
