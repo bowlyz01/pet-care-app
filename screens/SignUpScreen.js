@@ -6,6 +6,7 @@ import {ArrowLeftIcon} from 'react-native-heroicons/solid';
 import { useNavigation } from '@react-navigation/native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebase';
+import BackButton from '../components/BackButton';
 
 // subscribe for more videos like this :)
 export default function SignUpScreen() {
@@ -31,12 +32,7 @@ export default function SignUpScreen() {
     <View className="flex-1 bg-white" style={{backgroundColor: themeColors.bg}}>
       <SafeAreaView className="flex">
         <View className="flex-row justify-start">
-            <TouchableOpacity 
-                onPress={()=> navigation.goBack()}
-                className="bg-yellow-400 p-2 rounded-tr-2xl rounded-bl-2xl ml-4"
-            >
-                <ArrowLeftIcon size="20" color="black" />
-            </TouchableOpacity>
+        <BackButton />
         </View>
         <View className="flex-row justify-center">
             <Image source={require('../assets/images/signup.png')} 
@@ -84,14 +80,6 @@ export default function SignUpScreen() {
         <View className="flex-row justify-center space-x-12">
             <TouchableOpacity className="p-2 bg-gray-100 rounded-2xl">
                 <Image source={require('../assets/icons/google.png')} 
-                    className="w-10 h-10" />
-            </TouchableOpacity>
-            <TouchableOpacity className="p-2 bg-gray-100 rounded-2xl">
-                <Image source={require('../assets/icons/apple.png')} 
-                    className="w-10 h-10" />
-            </TouchableOpacity>
-            <TouchableOpacity className="p-2 bg-gray-100 rounded-2xl">
-                <Image source={require('../assets/icons/facebook.png')} 
                     className="w-10 h-10" />
             </TouchableOpacity>
         </View>
