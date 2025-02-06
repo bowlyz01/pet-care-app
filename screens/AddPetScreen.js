@@ -1,23 +1,24 @@
-import { View, Text, TouchableOpacity, TextInput, ScrollView, Image } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import BackButton from '../components/BackButton';
 import Foundation from '@expo/vector-icons/Foundation';
-// import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 // ไอคอนสัตว์เลี้ยงให้เลือก
-const petIcons = [
-  "🐶", "🐱", "🐰", "🐹", "🐦", "🐠", "🐢", "🐍"
-];
+const petIcons = ["🐶", "🐱", "🐰", "🐹", "🐦", "🐠", "🐢", "🐍"];
 
 export default function AddPetScreen() {
   const navigation = useNavigation();
   const [selectedIcon, setSelectedIcon] = useState("🐶");
   const [petName, setPetName] = useState("");
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [petWeight, setPetWeight] = useState("");
   const [petGender, setPetGender] = useState("male");
+
+  // State สำหรับ Date Picker
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false);
 
   return (
     <SafeAreaView className="flex-1 bg-white p-4">
@@ -55,35 +56,26 @@ export default function AddPetScreen() {
           onChangeText={setPetName}
         />
 
-        <Text className="text-lg font-semibold text-gray-700">Age (in years)</Text>
-        {/* <TextInput 
-          className="border border-gray-300 p-3 rounded-xl mb-4"
-          placeholder="Enter pet age"
-          keyboardType="numeric"
-          value={petAge}
-          onChangeText={setPetAge}
-
-        /> */}
         {/* Date Picker */}
-        {/* <Text className="text-lg font-semibold text-gray-700">Birthdate</Text>
+        <Text className="text-lg font-semibold text-gray-700">Birthdate</Text>
         <TouchableOpacity 
           className="border border-gray-300 p-3 rounded-xl mb-4"
-          onPress={() => setShowDatePicker(true)}
+          onPress={() => setShowPicker(true)}
         >
           <Text>{selectedDate.toDateString()}</Text>
         </TouchableOpacity>
 
-        {showDatePicker && (
+        {showPicker && (
           <DateTimePicker
             value={selectedDate}
             mode="date"
             display="default"
             onChange={(event, date) => {
-              setShowDatePicker(false);
+              setShowPicker(false);
               if (date) setSelectedDate(date);
             }}
           />
-        )} */}
+        )}
 
         <Text className="text-lg font-semibold text-gray-700">Weight (kg)</Text>
         <TextInput 
