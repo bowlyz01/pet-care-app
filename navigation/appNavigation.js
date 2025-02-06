@@ -3,10 +3,13 @@ import React from 'react'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
+import CalendarScreen from '../screens/CalendarScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignUpScreen from '../screens/SignUpScreen';
+import AddPetScreen from '../screens/AddPetScreen';
 import useAuth from '../hooks/useAuth';
+import BottomTabs from '../navigation/BottomTabs';
 
 const Stack = createNativeStackNavigator();
 
@@ -17,7 +20,9 @@ export default function AppNavigation() {
     return (
       <NavigationContainer>
         <Stack.Navigator initialRouteName='Home'>
-          <Stack.Screen name="Home" options={{headerShown: false}} component={HomeScreen} />
+          <Stack.Screen name="MainApp" options={{headerShown: false}} component={BottomTabs}/>
+          <Stack.Screen name="Calendar" options={{headerShown: false}} component={CalendarScreen}/>
+          <Stack.Screen name="AddPet" options={{headerShown: false}} component={AddPetScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     )
