@@ -79,12 +79,6 @@ export default function LoginScreen() {
             <TouchableOpacity className="p-2 bg-gray-100 rounded-2xl">
               <Image source={require('../assets/icons/google.png')} className="w-10 h-10" />
             </TouchableOpacity>
-            <TouchableOpacity className="p-2 bg-gray-100 rounded-2xl">
-              <Image source={require('../assets/icons/apple.png')} className="w-10 h-10" />
-            </TouchableOpacity>
-            <TouchableOpacity className="p-2 bg-gray-100 rounded-2xl">
-              <Image source={require('../assets/icons/facebook.png')} className="w-10 h-10" />
-            </TouchableOpacity>
           </View>
           <View className="flex-row justify-center mt-7">
               <Text className="text-gray-500 font-semibold">
