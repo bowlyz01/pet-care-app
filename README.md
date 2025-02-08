@@ -1,0 +1,6 @@
+- run "npm install"
+- run "npm run start"
+- for andriod 
+- 'a'
+- for ios 
+- 'i'
