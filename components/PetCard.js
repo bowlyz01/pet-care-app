@@ -30,7 +30,7 @@ const PetCard = ({ pet }) => {
         <InfoHart label="คะแนนหัวใจที่สะสมได้วันนี้" value="200" />
       </View>
       <View className="flex-row flex-wrap  justify-between gap-4 p-4">
-      <InfoBlock label="Weight" value={pet.weight} />
+      <InfoBlock label="Weight" value={pet.weight+'(kg)'} />
         <InfoBlock label="Vaccinations" value={pet.vaccinations} />
         <InfoBlock label="Graph Analyze" value="No data" /> 
         <InfoBlock label="Reminders" value={pet.reminders} />
