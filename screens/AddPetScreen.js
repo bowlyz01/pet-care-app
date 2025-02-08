@@ -6,6 +6,7 @@ import BackButton from '../components/BackButton';
 import Foundation from '@expo/vector-icons/Foundation';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { Platform } from 'react-native';
 import dayjs from 'dayjs';
 import { getAuth } from 'firebase/auth'; // สำหรับดึงข้อมูล userId
 import '../config/firebase';
@@ -67,40 +68,52 @@ export default function AddPetScreen() {
 
   // Handle Save Button (store to Firestore)
   const handleSavePet = async () => {
-    if (!validateInputs()) return; // Stop if validation fails
-
-    const birthdate = formatDate(selectedDate); // Format birthdate
-    const userId = currentUser?.uid; // ดึง userId จาก Firebase Authentication
-
+    if (!validateInputs()) return; // หยุดหากข้อมูลไม่ถูกต้อง
+  
+    const birthdate = formatDate(selectedDate); // แปลงวันเกิดเป็น YYYY-MM-DD
+    const userId = currentUser?.uid; // ดึง userId ของผู้ใช้ปัจจุบัน
+  
     if (!userId) {
       alert("You must be logged in to save a pet.");
       return;
     }
-
+  
     const petData = {
-      userId, // เชื่อมข้อมูลกับผู้ใช้งาน
+      userId, // เชื่อมข้อมูลกับเจ้าของสัตว์เลี้ยง
       name: petName,
       avatar: selectedIcon,
       breeding: selectedBreeding === "Other" ? customBreeding : selectedBreeding,
       weight: petWeight,
       gender: petGender,
       birthdate,
-      vaccinations: null, // ตั้งค่าเริ่มต้นเป็น null
-      reminders: null,    // ตั้งค่าเริ่มต้นเป็น null
-      relationshipPoints: 0, // ตั้งค่าเริ่มต้นเป็น 0
+      vaccinations: null,
+      reminders: null,
+      relationshipPoints: 0,
     };
-
+  
     try {
-      const docRef = await addDoc(collection(firestore, "pets"), petData); // Add to Firestore
-      console.log("Pet added with ID:", docRef.id);
+      // 1️⃣ เพิ่มสัตว์เลี้ยงใหม่ใน Firestore
+      const petRef = await addDoc(collection(firestore, "pets"), petData);
+      const petId = petRef.id; // ดึง petId ของสัตว์เลี้ยงที่เพิ่ม
+  
+      console.log("Pet added with ID:", petId);
+  
+      // 2️⃣ อัปเดต users collection โดยเพิ่ม petId ลงใน users.pets (array)
+      const userRef = doc(firestore, "users", userId);
+      await updateDoc(userRef, {
+        pets: arrayUnion(petId), // ใช้ arrayUnion() เพื่อป้องกันข้อมูลซ้ำ
+      });
+  
+      console.log("User updated with new pet ID:", petId);
+  
       alert("Pet added successfully!");
-      navigation.replace("MainApp"); // Redirect to MainApp
+      navigation.replace("MainApp"); // กลับไปหน้า MainApp
     } catch (error) {
       console.error("Error adding pet:", error);
       alert("Error adding pet. Please try again.");
     }
   };
-
+  
   return (
     <SafeAreaView className="flex-1 bg-white p-4">
       <View className="flex-row justify-start">
@@ -113,7 +126,7 @@ export default function AddPetScreen() {
 
       <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled={true}>
         {/* Select Icon */}
-        <Text className="text-lg font-semibold text-gray-700 mb-2">Select an Icon</Text>
+        <Text className="text-lg font-semibold text-gray-700 mb-2">Select pet type</Text>
         <View className="flex-row flex-wrap gap-2 mb-4">
           {Object.keys(petData).map((icon, index) => (
             <TouchableOpacity
@@ -181,16 +194,17 @@ export default function AddPetScreen() {
         </TouchableOpacity>
 
         {showPicker && (
-          <DateTimePicker
-            value={selectedDate}
-            mode="date"
-            display="default"
-            onChange={(event, date) => {
-              setShowPicker(false);
-              if (date) setSelectedDate(date);
-            }}
-          />
-        )}
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display="default"
+          onChange={(event, date) => {
+            setShowPicker(false);
+            if (date) setSelectedDate(date);
+          }}
+        />
+      )}
+
 
         <Text className="text-lg font-semibold text-gray-700">Weight (kg)</Text>
         <TextInput

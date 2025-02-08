@@ -17,24 +17,28 @@ export default function SignUpScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleSubmit = async ()=>{
-        if(email && password && username){
-            try{
+    const handleSubmit = async () => {
+        if (email && password && username) {
+            try {
+                console.log("Starting sign-up process...");
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
-
-                // บันทึกข้อมูลผู้ใช้ลงใน Firestore
+                console.log("User created successfully: ", user.uid);
+                console.log(auth.currentUser);
+    
+                // เพิ่มข้อมูลลง Firestore
                 await setDoc(doc(firestore, 'users', user.uid), {
                     name: username,
                     email: user.email,
                     createdAt: new Date().toISOString(),
-                    pets: [] // เริ่มต้นไม่มีสัตว์เลี้ยง
+                    pets: []
                 });
-
+    
+                console.log("User data added to Firestore!");
                 Alert.alert('Sign Up', 'User registered successfully!');
-                navigation.navigate('Home'); // นำผู้ใช้ไปหน้า Home
+                navigation.navigate('Home');
             } catch (err) {
-                console.log('got error: ', err.message);
+                console.log('Got error: ', err.message);
                 let msg = err.message;
                 if (msg.includes('auth/email-already-in-use')) msg = "Email already in use";
                 if (msg.includes('auth/invalid-email')) msg = "Please use a valid email";
@@ -44,7 +48,7 @@ export default function SignUpScreen() {
             Alert.alert('Sign Up', 'Please fill in all fields');
         }
     };
-  return (
+      return (
     <View className="flex-1 bg-white" style={{backgroundColor: themeColors.bg}}>
       <SafeAreaView className="flex">
         <View className="flex-row justify-start">

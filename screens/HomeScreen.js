@@ -1,20 +1,18 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { signOut } from 'firebase/auth'
-import { auth } from '../config/firebase'
+import { signOut, getAuth } from 'firebase/auth'
+import { db } from '../config/firebase'
 import { useNavigation } from '@react-navigation/native'
 import AddButton from '../components/AddButton'
 import PetCard from "../components/PetCard";
-import { db } from '../config/firebase';
-import { collection, getDocs } from "firebase/firestore"; 
-
-
-
+import { collection, getDocs, query, where } from "firebase/firestore"; 
 
 export default function HomeScreen() {
   const [petData, setPetData] = useState([]);
   const navigation = useNavigation();
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
 
   const handleLogout = async () => {
     try {
@@ -24,25 +22,30 @@ export default function HomeScreen() {
     }
   };
 
-  // ฟังก์ชันดึงข้อมูลจาก Firestore
+  // ดึงข้อมูลสัตว์เลี้ยงของผู้ใช้ที่ล็อกอิน
   const fetchPetData = async () => {
+    if (!currentUser) return; // ถ้ายังไม่ได้ล็อกอิน ไม่ต้องดึงข้อมูล
+
     try {
-      const petsCollection = collection(db, 'pets'); // อ้างอิงถึง Collection ชื่อ "pets"
-      const petSnapshot = await getDocs(petsCollection); // ดึงข้อมูลทั้งหมดใน Collection
+      const petsCollection = collection(db, 'pets');
+      const q = query(petsCollection, where("userId", "==", currentUser.uid)); // กรองตาม userId
+      const petSnapshot = await getDocs(q);
+      
       const petList = petSnapshot.docs.map((doc) => ({
-        id: doc.id, // เก็บ ID ของเอกสาร
-        ...doc.data(), // ข้อมูลในเอกสาร
+        id: doc.id,
+        ...doc.data(),
       }));
+
       setPetData(petList); 
     } catch (error) {
       console.log('Error fetching pet data:', error);
     }
   };
 
-  // เรียก fetchPetData เมื่อ Component ถูกโหลด
+  // โหลดข้อมูลเมื่อ Component โหลด และอัปเดตเมื่อ user เปลี่ยน
   useEffect(() => {
     fetchPetData();
-  }, []);
+  }, [currentUser]); // ทำงานใหม่เมื่อ user เปลี่ยน
 
   return (
     <SafeAreaView className="flex-1">
@@ -56,19 +59,18 @@ export default function HomeScreen() {
 
       {/* ScrollView สำหรับเนื้อหาหลัก */}
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        
         {/* Pet Card */}
         <View className="p-4">
-        {petData.map((pet, index) => (
-          <PetCard key={index} pet={pet} />
-        ))}
+          {petData.length > 0 ? (
+            petData.map((pet) => <PetCard key={pet.id} pet={pet} />)
+          ) : (
+            <Text className="text-center text-gray-500">No pets found.</Text>
+          )}
         </View>
-        
-        
       </ScrollView>
 
       {/* ปุ่ม AddNewPet */}
       <AddButton />
     </SafeAreaView>
-  )
+  );
 }
