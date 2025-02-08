@@ -1,5 +1,5 @@
 - run "npm install"
-- run "npm run start"
+- run "npx expo start"
 - for andriod 
 - 'a'
 - for ios 
