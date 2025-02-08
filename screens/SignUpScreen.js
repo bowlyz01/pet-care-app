@@ -6,8 +6,11 @@ import { useNavigation } from '@react-navigation/native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import BackButton from '../components/BackButton';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
-// subscribe for more videos like this :)
+const firestore = getFirestore();
+
+
 export default function SignUpScreen() {
     const navigation = useNavigation();
     const [username, setUsername] = useState('');
@@ -15,18 +18,32 @@ export default function SignUpScreen() {
     const [password, setPassword] = useState('');
 
     const handleSubmit = async ()=>{
-        if(email && password){
+        if(email && password && username){
             try{
-                await createUserWithEmailAndPassword(auth, email, password);
-            }catch(err){
-                console.log('got error: ',err.message);
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // บันทึกข้อมูลผู้ใช้ลงใน Firestore
+                await setDoc(doc(firestore, 'users', user.uid), {
+                    name: username,
+                    email: user.email,
+                    createdAt: new Date().toISOString(),
+                    pets: [] // เริ่มต้นไม่มีสัตว์เลี้ยง
+                });
+
+                Alert.alert('Sign Up', 'User registered successfully!');
+                navigation.navigate('Home'); // นำผู้ใช้ไปหน้า Home
+            } catch (err) {
+                console.log('got error: ', err.message);
                 let msg = err.message;
-                if(msg.includes('auth/email-already-in-use')) msg = "Email already in use"
-                if(msg.includes('auth/invalid-email)')) msg = "Please use a valid email"
-                Alert.alert('Sign Up', err.message);
+                if (msg.includes('auth/email-already-in-use')) msg = "Email already in use";
+                if (msg.includes('auth/invalid-email')) msg = "Please use a valid email";
+                Alert.alert('Sign Up', msg);
             }
+        } else {
+            Alert.alert('Sign Up', 'Please fill in all fields');
         }
-    }
+    };
   return (
     <View className="flex-1 bg-white" style={{backgroundColor: themeColors.bg}}>
       <SafeAreaView className="flex">

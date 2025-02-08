@@ -1,45 +1,19 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { signOut } from 'firebase/auth'
 import { auth } from '../config/firebase'
 import { useNavigation } from '@react-navigation/native'
 import AddButton from '../components/AddButton'
 import PetCard from "../components/PetCard";
+import { db } from '../config/firebase';
+import { collection, getDocs } from "firebase/firestore"; 
 
-const petData = [
-  {
-    name: "bambi",
-    age: "21 Days Old (3 Week)",
-    gender: "male",
-    avatar: "\ud83d\udc04", // Cow emoji as placeholder
-    stats: {
-      weight: "0 gr",
-      vaccinations: 0,
-      photos: 0,
-      reminders: 3,
-      notes: 0,
-      contacts: 1
-    }
-  },
-  {
-    name: "bamboo",
-    age: "7 Years and 5 Months Old",
-    gender: "female",
-    avatar: "\ud83d\udc36", // Dog emoji as placeholder
-    stats: {
-      weight: "0 gr",
-      vaccinations: 2,
-      photos: 0,
-      reminders: 0,
-      notes: 0,
-      contacts: 0
-    }
-  }
-];
+
 
 
 export default function HomeScreen() {
+  const [petData, setPetData] = useState([]);
   const navigation = useNavigation();
 
   const handleLogout = async () => {
@@ -49,6 +23,27 @@ export default function HomeScreen() {
       console.log(error);
     }
   };
+
+  // ฟังก์ชันดึงข้อมูลจาก Firestore
+  const fetchPetData = async () => {
+    try {
+      const petsCollection = collection(db, 'pets'); // อ้างอิงถึง Collection ชื่อ "pets"
+      const petSnapshot = await getDocs(petsCollection); // ดึงข้อมูลทั้งหมดใน Collection
+      const petList = petSnapshot.docs.map((doc) => ({
+        id: doc.id, // เก็บ ID ของเอกสาร
+        ...doc.data(), // ข้อมูลในเอกสาร
+      }));
+      setPetData(petList); 
+    } catch (error) {
+      console.log('Error fetching pet data:', error);
+    }
+  };
+
+  // เรียก fetchPetData เมื่อ Component ถูกโหลด
+  useEffect(() => {
+    fetchPetData();
+  }, []);
+
   return (
     <SafeAreaView className="flex-1">
       {/* แถบสำหรับ Logout */}
@@ -60,7 +55,7 @@ export default function HomeScreen() {
       </View>
 
       {/* ScrollView สำหรับเนื้อหาหลัก */}
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="bg-blue-100">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         
         {/* Pet Card */}
         <View className="p-4">
