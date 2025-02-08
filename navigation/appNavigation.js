@@ -2,7 +2,12 @@ import { View, Text } from 'react-native'
 import React from 'react'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from '../screens/HomeScreen';
+import WeightDetailsScreen from '../screens/InfoPet/WeightDetails';
+import VaccinationsDetailsScreen from '../screens/InfoPet/VaccinationsDetails';
+import GraphAnalyzeScreen from '../screens/InfoPet/GraphAnalyzeDetails';
+import RemindersScreen from '../screens/InfoPet/RemindersDetails';
+import ContactsDetailsScreen from '../screens/InfoPet/ContactsDetails';
+import HealthDetailsScreen from '../screens/InfoPet/HealthDetails';
 import CalendarScreen from '../screens/CalendarScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/LoginScreen';
@@ -23,6 +28,13 @@ export default function AppNavigation() {
           <Stack.Screen name="MainApp" options={{headerShown: false}} component={BottomTabs}/>
           <Stack.Screen name="Calendar" options={{headerShown: false}} component={CalendarScreen}/>
           <Stack.Screen name="AddPet" options={{headerShown: false}} component={AddPetScreen} />
+          <Stack.Screen name="WeightDetails" options={{headerShown: false}} component={WeightDetailsScreen} />
+          <Stack.Screen name="VaccinationsDetails" options={{headerShown: false}} component={VaccinationsDetailsScreen} />
+          <Stack.Screen name="GraphAnalyzeDetails" options={{headerShown: false}} component={GraphAnalyzeScreen} />
+          <Stack.Screen name="RemindersDetails" options={{headerShown: false}} component={RemindersScreen} />
+          <Stack.Screen name="ContactsDetails" options={{headerShown: false}} component={ContactsDetailsScreen} />
+          <Stack.Screen name="HealthDetails" options={{headerShown: false}} component={HealthDetailsScreen} />
+
         </Stack.Navigator>
       </NavigationContainer>
     )
