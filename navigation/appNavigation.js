@@ -15,6 +15,8 @@ import SignUpScreen from '../screens/SignUpScreen';
 import AddPetScreen from '../screens/AddPetScreen';
 import useAuth from '../hooks/useAuth';
 import BottomTabs from '../navigation/BottomTabs';
+import AddActivity from '../screens/AddActivityScreen';
+import FindClinicScreen from '../screens/FindClinicScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,12 +30,14 @@ export default function AppNavigation() {
           <Stack.Screen name="MainApp" options={{headerShown: false}} component={BottomTabs}/>
           <Stack.Screen name="Calendar" options={{headerShown: false}} component={CalendarScreen}/>
           <Stack.Screen name="AddPet" options={{headerShown: false}} component={AddPetScreen} />
+          <Stack.Screen name="AddActivity" options={{headerShown: false}} component={AddActivity} />
           <Stack.Screen name="WeightDetails" options={{headerShown: false}} component={WeightDetailsScreen} />
           <Stack.Screen name="VaccinationsDetails" options={{headerShown: false}} component={VaccinationsDetailsScreen} />
           <Stack.Screen name="GraphAnalyzeDetails" options={{headerShown: false}} component={GraphAnalyzeScreen} />
           <Stack.Screen name="RemindersDetails" options={{headerShown: false}} component={RemindersScreen} />
           <Stack.Screen name="ContactsDetails" options={{headerShown: false}} component={ContactsDetailsScreen} />
           <Stack.Screen name="HealthDetails" options={{headerShown: false}} component={HealthDetailsScreen} />
+          <Stack.Screen name="FindClinic" options={{headerShown: false}} component={FindClinicScreen} />
 
         </Stack.Navigator>
       </NavigationContainer>

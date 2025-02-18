@@ -3,8 +3,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { Entypo, FontAwesome } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
-import AddPetScreen from '../screens/AddPetScreen';
+import FindClinicScreen from '../screens/FindClinicScreen';
 import CalendarScreen from '../screens/CalendarScreen';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabs() {
@@ -20,6 +21,10 @@ export default function BottomTabs() {
             iconName = 'calendar';
             return <FontAwesome name={iconName} size={size} color={color} />;
           }
+          else if (route.name === 'FindClinic') {
+            iconName = 'clinic-medical';
+            return <FontAwesome5 name={iconName} size={size} color={color} />;
+          }
         },
         tabBarActiveTintColor: '#45BCD8',
         tabBarInactiveTintColor: 'gray',
@@ -28,6 +33,7 @@ export default function BottomTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Calendar" component={CalendarScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="FindClinic" component={FindClinicScreen} options={{ headerShown: false }}/>
     </Tab.Navigator>
   );
 }

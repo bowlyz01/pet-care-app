@@ -6,7 +6,7 @@ import BackButton from "../components/BackButton";
 import ActivitiesCard from "../components/ActivityCard";
 import { Calendar } from "react-native-calendars";
 import { db } from "../config/firebase";
-
+import AddActivity from "../components/AddActivity";
 const activities = {
   "2025-02-22": [
     { time: "23:45", type: "Weight", description: "Time for bambi's weight update!" },
@@ -70,9 +70,14 @@ export default function CalendarScreen() {
 
       {/* Selected Day Activities */}
       <ScrollView style={styles.activitiesContainer}>
+        <View className="flex-row justify-between items-center">
         <Text style={styles.activitiesHeader}>
           {selectedDay ? `Activities for ${selectedDay}` : "Select a day to view activities"}
         </Text>
+        <AddActivity selectedDay={selectedDay} />
+
+        </View>
+        
         {selectedDay && activities[selectedDay] ? (
           activities[selectedDay].map((activity, idx) => (
             <ActivitiesCard
