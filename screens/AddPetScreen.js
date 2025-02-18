@@ -59,8 +59,9 @@ export default function AddPetScreen() {
       alert("Please select or enter the breeding.");
       return false;
     }
-    if (!petWeight.trim() || isNaN(petWeight) || Number(petWeight) <= 0) {
-      alert("Please enter a valid weight.");
+    const weightPattern = /^(100(\.00?)?|[0-9]{1,2}(\.\d{1,2})?)$/; // ตรวจสอบค่า 0-100 ทศนิยมไม่เกิน 2 ตำแหน่ง
+    if (!weightPattern.test(petWeight)) {
+      alert("Please enter a valid weight between 0 - 100 (up to 2 decimal places).");
       return false;
     }
     return true;
