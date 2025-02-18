@@ -5,6 +5,7 @@ import { Entypo, FontAwesome } from '@expo/vector-icons';
 import HomeScreen from '../screens/HomeScreen';
 import FindClinicScreen from '../screens/FindClinicScreen';
 import CalendarScreen from '../screens/CalendarScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 const Tab = createBottomTabNavigator();
 
@@ -25,6 +26,10 @@ export default function BottomTabs() {
             iconName = 'clinic-medical';
             return <FontAwesome5 name={iconName} size={size} color={color} />;
           }
+          else if (route.name === 'Profile') {
+            iconName = 'user';
+            return <FontAwesome name={iconName} size={size} color={color} />;
+          }
         },
         tabBarActiveTintColor: '#45BCD8',
         tabBarInactiveTintColor: 'gray',
@@ -34,6 +39,7 @@ export default function BottomTabs() {
       <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Calendar" component={CalendarScreen} options={{ headerShown: false }} />
       <Tab.Screen name="FindClinic" component={FindClinicScreen} options={{ headerShown: false }}/>
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
 }

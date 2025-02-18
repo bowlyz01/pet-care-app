@@ -11,6 +11,7 @@ import HealthDetailsScreen from '../screens/InfoPet/HealthDetails';
 import CalendarScreen from '../screens/CalendarScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/LoginScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import AddPetScreen from '../screens/AddPetScreen';
 import useAuth from '../hooks/useAuth';
@@ -38,6 +39,7 @@ export default function AppNavigation() {
           <Stack.Screen name="ContactsDetails" options={{headerShown: false}} component={ContactsDetailsScreen} />
           <Stack.Screen name="HealthDetails" options={{headerShown: false}} component={HealthDetailsScreen} />
           <Stack.Screen name="FindClinic" options={{headerShown: false}} component={FindClinicScreen} />
+          <Stack.Screen name="Profile" options={{headerShown: false}} component={ProfileScreen} />
 
         </Stack.Navigator>
       </NavigationContainer>
