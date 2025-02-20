@@ -20,6 +20,7 @@ export default function LoginScreen() {
               console.log('got error: ',err.message);
               let msg = err.message;
               if(msg.includes('invalid-login-credentials')) msg = "Invalid credentials";
+              if (msg.includes('auth/invalid-credential')) msg = "Invalid email or password";
               if(msg.includes('auth/invalid-email')) msg = "Invalid email";
               Alert.alert('Sign In', msg);
           }
