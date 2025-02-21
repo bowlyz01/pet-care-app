@@ -54,13 +54,13 @@ const PetCard = ({ pet }) => {
         <InfoHart label="Heart Points Earned Today" value={pet.relationshipPoints} />
       </View>
       <View className="flex-row flex-wrap  justify-between gap-4 p-4">
-      <InfoBlock label="Weight" value={pet.weight+'(kg)'} screenName="WeightDetails"/>
-        <InfoBlock label="Vaccinations" value={pet.vaccinations} screenName="VaccinationsDetails"/>
+      <InfoBlock label="Weight" value={pet.weight+'(kg)'} screenName="WeightDetails" petID={pet.id}/>
+        <InfoBlock label="Vaccinations" value={pet.vaccinations} screenName="VaccinationsDetails" petID={pet.id}/>
         {/* ยังไม่ได้ทำ graph,health info,contacts */}
-        <InfoBlock label="Graph Analyze" value={pet.vaccinations} screenName="GraphAnalyzeDetails"/> 
-        <InfoBlock label="Reminders" value={pet.reminders} screenName="RemindersDetails"/>
-        <InfoBlock label="Health Info" value={pet.vaccinations} screenName="HealthDetails"/> 
-        <InfoBlock label="Contacts" value={pet.vaccinations} screenName="ContactsDetails"/> 
+        <InfoBlock label="Graph Analyze" value={pet.vaccinations} screenName="GraphAnalyzeDetails" petID={pet.id}/> 
+        <InfoBlock label="Reminders" value={pet.reminders} screenName="RemindersDetails" petID={pet.id}/>
+        <InfoBlock label="Health Info" value={pet.vaccinations} screenName="HealthDetails" petID={pet.id}/> 
+        <InfoBlock label="Contacts" value={pet.vaccinations} screenName="ContactsDetails" petID={pet.id}/> 
       </View>
     </View>
   );
