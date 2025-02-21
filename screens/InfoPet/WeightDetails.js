@@ -155,7 +155,7 @@ useEffect(() => {
         <Text className="text-lg font-semibold text-gray-700 mb-2">Notes</Text>
         <TextInput className="border border-gray-300 p-3 rounded-xl mb-4" placeholder="Enter notes" value={notes} onChangeText={setNotes} />
 
-        <TouchableOpacity className="bg-blue-500 p-4 rounded-xl items-center" onPress={handleSavePet}>
+        <TouchableOpacity className="bg-green-500 p-4 rounded-xl items-center" onPress={handleSavePet}>
           <Text className="text-white font-bold text-lg">Save</Text>
         </TouchableOpacity>
       </View>
