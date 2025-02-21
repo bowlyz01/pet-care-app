@@ -9,7 +9,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { Platform } from 'react-native';
 import dayjs from 'dayjs';
 import { getAuth } from 'firebase/auth'; // สำหรับดึงข้อมูล userId
-import '../config/firebase';
+import { db } from '../config/firebase';
 import { getFirestore, collection, addDoc, updateDoc, arrayUnion, doc } from 'firebase/firestore';
 
 const petData = {
@@ -32,7 +32,6 @@ export default function AddPetScreen() {
   const [selectedBreeding, setSelectedBreeding] = useState(null);
   const [customBreeding, setCustomBreeding] = useState("");
   const [petName, setPetName] = useState("");
-  const [petWeight, setPetWeight] = useState("");
   const [petGender, setPetGender] = useState("male");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
@@ -59,11 +58,6 @@ export default function AddPetScreen() {
       alert("Please select or enter the breeding.");
       return false;
     }
-    const weightPattern = /^(100(\.00?)?|[0-9]{1,2}(\.\d{1,2})?)$/; // ตรวจสอบค่า 0-100 ทศนิยมไม่เกิน 2 ตำแหน่ง
-    if (!weightPattern.test(petWeight)) {
-      alert("Please enter a valid weight between 0 - 100 (up to 2 decimal places).");
-      return false;
-    }
     return true;
   };
 
@@ -84,7 +78,7 @@ export default function AddPetScreen() {
       name: petName,
       avatar: selectedIcon,
       breeding: selectedBreeding === "Other" ? customBreeding : selectedBreeding,
-      weight: petWeight,
+      weight: null,
       gender: petGender,
       birthdate,
       vaccinations: null,
@@ -177,7 +171,7 @@ export default function AddPetScreen() {
           </View>
         )}
 
-        {/* Name, Birthdate, Weight, Gender */}
+        {/* Name, Birthdate, Gender */}
         <Text className="text-lg font-semibold text-gray-700">Pet Name</Text>
         <TextInput
           className="border border-gray-300 p-3 rounded-xl mb-4"
@@ -205,16 +199,6 @@ export default function AddPetScreen() {
           }}
         />
       )}
-
-
-        <Text className="text-lg font-semibold text-gray-700">Weight (kg)</Text>
-        <TextInput
-          className="border border-gray-300 p-3 rounded-xl mb-4"
-          placeholder="Enter pet weight"
-          keyboardType="numeric"
-          value={petWeight}
-          onChangeText={setPetWeight}
-        />
 
         <Text className="text-lg font-semibold text-gray-700">Gender</Text>
         <View className="flex-row justify-between mb-6">
