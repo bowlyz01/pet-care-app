@@ -1,11 +1,11 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-const InfoBlock = ({ label, value, screenName }) => {
+const InfoBlock = ({ label, value, screenName, petID }) => {
   const navigation = useNavigation();
 
   const handlePress = () => {
-    navigation.navigate(screenName, { label, value }); // เปลี่ยนหน้าไปยัง screenName พร้อม params
+    navigation.navigate(screenName, { petID,label, value }); // เปลี่ยนหน้าไปยัง screenName พร้อม params
   };
 
   return (
