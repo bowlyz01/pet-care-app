@@ -81,9 +81,6 @@ export default function AddPetScreen() {
       weight: null,
       gender: petGender,
       birthdate,
-      vaccinations: null,
-      reminders: null,
-      relationshipPoints: 0,
     };
   
     try {
