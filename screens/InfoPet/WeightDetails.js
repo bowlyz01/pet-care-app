@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import BackButton from '../../components/BackButton';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import dayjs from 'dayjs';
-import { getFirestore, collection, addDoc, updateDoc, arrayUnion, doc,query, where, getDocs, orderBy  } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, updateDoc, arrayUnion, doc,query, where, getDocs, orderBy, deleteDoc  } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { getAuth } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
@@ -120,6 +120,43 @@ const fetchWeightHistory = async () => {
   }
 };
 
+
+const deleteWeightRecord = async (id) => {
+  Alert.alert(
+    'Delete Record',
+    'Are you sure you want to delete this weight record?',
+    [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', onPress: async () => {
+          try {
+            await deleteDoc(doc(db, 'weights', id));
+            console.log(`✅ Deleted weight record (${id})`);
+
+            // โหลดข้อมูลใหม่หลังจากลบ
+            const updatedHistory = history.filter(item => item.id !== id);
+            setHistory(updatedHistory);
+
+            if (updatedHistory.length > 0) {
+              // ถ้ายังมีประวัติอยู่ อัปเดตน้ำหนักของสัตว์เลี้ยงเป็นรายการล่าสุด
+              const latestWeight = updatedHistory[0].weight;
+              await updatePetWeight(latestWeight);
+            } else {
+              // ถ้าประวัติถูกลบทั้งหมด ให้ตั้งค่าน้ำหนักของสัตว์เลี้ยงเป็น null
+              await updatePetWeight(null);
+            }
+            alert('Weight record deleted successfully!');
+            fetchWeightHistory(); // โหลดข้อมูลใหม่หลังจากลบ
+            navigation.replace("MainApp"); // กลับไปหน้า MainApp
+          } catch (error) {
+            console.error('❌ Error deleting weight record:', error);
+            alert('Failed to delete weight record.');
+          }
+        }
+      }
+    ]
+  );
+};
+
 // ✅ โหลดข้อมูลเมื่อหน้าจอเปิด
 useEffect(() => {
   fetchWeightHistory();
@@ -170,11 +207,13 @@ useEffect(() => {
             data={history}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <View className="border border-gray-300 p-3 rounded-xl mb-2">
-                <Text className="text-gray-800">{item.weight} kg</Text>
-                <Text className="text-gray-600">{dayjs(item.date).format('MMM D, YYYY h:mm A')}</Text>
-                {item.notes ? <Text className="text-gray-500">Notes: {item.notes}</Text> : null}
-              </View>
+              <TouchableOpacity onLongPress={() => deleteWeightRecord(item.id)}>
+                <View className="border border-gray-300 p-3 rounded-xl mb-2">
+                  <Text className="text-gray-800">{item.weight} kg</Text>
+                  <Text className="text-gray-600">{dayjs(item.date).format('MMM D, YYYY h:mm A')}</Text>
+                  {item.notes ? <Text className="text-gray-500">Notes: {item.notes}</Text> : null}
+                </View>
+              </TouchableOpacity>
             )}
           />
         )}
