@@ -18,35 +18,56 @@ export default function SignUpScreen() {
     const [password, setPassword] = useState('');
 
     const handleSubmit = async () => {
-        if (email && password && username) {
-            try {
-                console.log("Starting sign-up process...");
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                console.log("User created successfully: ", user.uid);
-                console.log(auth.currentUser);
-    
-                // เพิ่มข้อมูลลง Firestore
-                await setDoc(doc(firestore, 'users', user.uid), {
-                    name: username,
-                    email: user.email,
-                    createdAt: new Date().toISOString(),
-                    pets: []
-                });
-    
-                console.log("User data added to Firestore!");
-                Alert.alert('Sign Up', 'User registered successfully!');
-                navigation.navigate('Home');
-            } catch (err) {
-                console.log('Got error: ', err.message);
-                let msg = err.message;
-                if (msg.includes('auth/email-already-in-use')) msg = "Email already in use";
-                if (msg.includes('auth/invalid-email')) msg = "Please use a valid email";
-                Alert.alert('Sign Up', msg);
-            }
-        } else {
-            Alert.alert('Sign Up', 'Please fill in all fields');
-        }
+        // ตรวจสอบ username
+    if (username.length < 6 || username.length > 30) {
+        Alert.alert('Sign Up', 'Username must be between 6 and 30 characters');
+        return;
+    }
+
+    // ตรวจสอบ email
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+        Alert.alert('Sign Up', 'Please enter a valid email address');
+        return;
+    }
+
+    // ตรวจสอบ password
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,64}$/;
+    if (!passwordRegex.test(password)) {
+        Alert.alert('Sign Up', 'Password must be between 8 and 64 characters, include a mix of uppercase, lowercase, numbers, and special characters');
+        return;
+    }
+
+    // ตรวจสอบว่าไม่มีช่องว่าง
+    if (!email || !password || !username) {
+        Alert.alert('Sign Up', 'Please fill in all fields');
+        return;
+    }
+    try {
+        console.log("Starting sign-up process...");
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        console.log("User created successfully: ", user.uid);
+        console.log(auth.currentUser);
+
+        // เพิ่มข้อมูลลง Firestore
+        await setDoc(doc(firestore, 'users', user.uid), {
+            name: username,
+            email: user.email,
+            createdAt: new Date().toISOString(),
+            pets: []
+        });
+
+        console.log("User data added to Firestore!");
+        Alert.alert('Sign Up', 'User registered successfully!');
+        navigation.navigate('Home');
+    } catch (err) {
+        console.log('Got error: ', err.message);
+        let msg = err.message;
+        if (msg.includes('auth/email-already-in-use')) msg = "Email already in use";
+        if (msg.includes('auth/invalid-email')) msg = "Please use a valid email";
+        Alert.alert('Sign Up', msg);
+    }
     };
       return (
     <View className="flex-1 bg-white" style={{backgroundColor: themeColors.bg}}>
