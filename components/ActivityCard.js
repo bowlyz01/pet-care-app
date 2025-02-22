@@ -32,14 +32,14 @@ export default function ActivitiesCard({ id, time, type, description, onDelete }
 
   const confirmDelete = () => {
     Alert.alert(
-      "ยืนยันการลบ",
-      `คุณต้องการลบ \"${description}\" หรือไม่?`,
+      "Confirm Deletion",
+      `Do you want to delete \"${description}\"?`,
       [
-        { text: "ยกเลิก", style: "cancel", onPress: () => (translateX.value = withSpring(0)) },
-        { text: "ลบ", style: "destructive", onPress: () => onDelete(id) },
+        { text: "Cancel", style: "cancel", onPress: () => (translateX.value = withSpring(0)) },
+        { text: "Delete", style: "destructive", onPress: () => onDelete(id) },
       ]
     );
-  };
+  };  
 
   return (
     <GestureHandlerRootView>
