@@ -42,10 +42,10 @@ export default function HomeScreen() {
     }
   };
 
-  // โหลดข้อมูลเมื่อ Component โหลด และอัปเดตเมื่อ user เปลี่ยน
+  // โหลดข้อมูลเมื่อ Component โหลด และอัปเดต
   useEffect(() => {
     fetchPetData();
-  }, [currentUser]); // ทำงานใหม่เมื่อ user เปลี่ยน
+  }, []); 
 
     // รีโหลดข้อมูลเมื่อกลับมาที่หน้า HomeScreen
     useFocusEffect(
