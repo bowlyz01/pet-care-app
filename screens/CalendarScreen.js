@@ -6,23 +6,21 @@ import BackButton from "../components/BackButton";
 import ActivitiesCard from "../components/ActivityCard";
 import { Calendar } from "react-native-calendars";
 import AddActivity from "../components/AddActivity";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { db } from "../config/firebase";
+import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
-const initialActivities = {
-  "2025-02-22": [
-    { time: "23:45", type: "Weight", description: "Time for bambi's weight update!" },
-    { time: "23:45", type: "Picture", description: "Time for bambi's new picture!" },
-  ],
-  "2025-02-23": [
-    { time: "10:00", type: "Walk", description: "Morning walk for bambi." },
-  ],
-};
 
 export default function CalendarScreen() {
   const navigation = useNavigation();
   const today = new Date().toISOString().split("T")[0];
   const [selectedDay, setSelectedDay] = useState(today);
-  const [activities, setActivities] = useState(initialActivities);
-  const [lastDeleted, setLastDeleted] = useState(null);
+  const [activities, setActivities] = useState({});
+
+
+  const auth = getAuth();
+  const user = auth.currentUser;
 
   useFocusEffect(
     useCallback(() => {
@@ -30,39 +28,56 @@ export default function CalendarScreen() {
     }, [today])
   );
 
-  const handleDelete = (day, index) => {
-    const deletedActivity = activities[day][index];
-    setLastDeleted({ day, index, activity: deletedActivity });
-
-    const updatedActivities = { ...activities };
-    updatedActivities[day].splice(index, 1);
-    if (updatedActivities[day].length === 0) delete updatedActivities[day];
-    setActivities(updatedActivities);
-
-    Alert.alert("Activity Deleted", "The activity has been removed.", [
-      {
-        text: "Undo",
-        onPress: () => undoDelete(),
-        style: "cancel",
-      },
-      { text: "OK" },
-    ]);
+  const fetchActivities = async (day) => {
+    if (!user) return;
+  
+    try {
+      const q = query(collection(db, "activities"), where("userId", "==", user.uid), where("date", "==", day));
+      const querySnapshot = await getDocs(q);
+      const activitiesList = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        startTime: doc.data().startTime || "00:00",
+        endTime: doc.data().endTime || "00:00",
+      }));
+  
+      setActivities(prev => ({ ...prev, [day]: activitiesList }));
+    } catch (error) {
+      console.error("Error fetching activities:", error);
+    }
   };
+  
 
-  const undoDelete = () => {
-    if (!lastDeleted) return;
-    const { day, index, activity } = lastDeleted;
-    const updatedActivities = { ...activities };
-    if (!updatedActivities[day]) updatedActivities[day] = [];
-    updatedActivities[day].splice(index, 0, activity);
-    setActivities(updatedActivities);
-    setLastDeleted(null);
+
+  const handleDelete = async (selectedDay, activityId, newStatus) => {
+    setActivities((prevActivities) => {
+      const updatedActivities = { ...prevActivities };
+  
+      if (updatedActivities[selectedDay]) {
+        updatedActivities[selectedDay] = updatedActivities[selectedDay].map((activity) =>
+          activity.id === activityId ? { ...activity, status: newStatus } : activity
+        );
+      }
+  
+      return updatedActivities;
+    });
+  
+    try {
+      if (newStatus === "Delete") {
+        await deleteDoc(doc(db, "activities", activityId)); // ลบจาก Firebase
+        console.log(`Activity ${activityId} deleted successfully`);
+      }
+    } catch (error) {
+      console.error("Error deleting activity:", error);
+    }
   };
+  
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-      <View className="flex-row justify-start">
+      <View className="flex-row justify-between items-center px-4 py-2">
         <BackButton />
+        <MaterialCommunityIcons name="calendar-clock-outline" size={24} color="black" />
       </View>
       <View className="flex-row justify-center items-center">
         <Text className="text-lg font-bold">Calendar Page</Text>
@@ -70,7 +85,9 @@ export default function CalendarScreen() {
 
       <View style={styles.calendarContainer}>
         <Calendar
-          onDayPress={(day) => setSelectedDay(day.dateString)}
+          onDayPress={(day) => {
+            setSelectedDay(day.dateString);
+            fetchActivities(day.dateString);}}
           markedDates={{
             [selectedDay]: { selected: true, selectedColor: "blue" },
           }}
@@ -92,15 +109,21 @@ export default function CalendarScreen() {
           <AddActivity selectedDay={selectedDay} />
         </View>
 
-        {selectedDay && activities[selectedDay] ? (
-          activities[selectedDay].map((activity, idx) => (
+        {selectedDay && activities[selectedDay]?.filter(activity => activity.status !== "Delete").length > 0 ? (
+        activities[selectedDay]
+          .filter(activity => activity.status !== "Delete") // กรองข้อมูลที่ต้องการ
+          .map((activity, idx) => (
             <ActivitiesCard
-              key={idx}
-              time={activity.time}
-              type={activity.type}
-              description={activity.description}
-              onDelete={() => handleDelete(selectedDay, idx)}
-            />
+            key={activity.id}
+            id={activity.id} 
+            startTime={activity.startTime || "00:00"}
+            endTime={activity.endTime || "00:00"}
+            name={activity.activityType || "Unnamed Activity"}
+            petId={activity.petID || "Unknown Pet"}
+            points={activity.heartScore || 0}
+            status={activity.status || "Created"}
+            onDelete={(id, newStatus) => handleDelete(selectedDay, activity.id, newStatus)}
+          />
           ))
         ) : (
           <Text style={styles.noActivities}>
