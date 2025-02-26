@@ -17,6 +17,7 @@ export default function CalendarScreen() {
   const today = new Date().toISOString().split("T")[0];
   const [selectedDay, setSelectedDay] = useState(today);
   const [activities, setActivities] = useState({});
+  const [markedDates, setMarkedDates] = useState({});
 
 
   const auth = getAuth();
@@ -27,6 +28,36 @@ export default function CalendarScreen() {
       setSelectedDay(today);
     }, [today])
   );
+
+    // โหลดข้อมูลเมื่อหน้าโหลด
+  useEffect(() => {
+    fetchMarkedDates();
+  }, [user]);
+
+    // โหลดกิจกรรมทั้งหมดของผู้ใช้และกำหนดวันที่ที่มีจุดสีน้ำเงิน
+  const fetchMarkedDates = async () => {
+    if (!user) return;
+
+    try {
+      const q = query(collection(db, "activities"), where("userId", "==", user.uid));
+      const querySnapshot = await getDocs(q);
+
+      let datesWithActivities = {};
+      querySnapshot.forEach(doc => {
+        const activityDate = doc.data().date;
+        if (activityDate) {
+          datesWithActivities[activityDate] = {
+            marked: true,
+            dotColor: "blue", // จุดสีน้ำเงิน
+          };
+        }
+      });
+
+      setMarkedDates(datesWithActivities);
+    } catch (error) {
+      console.error("Error fetching marked dates:", error);
+    }
+  };
 
   const fetchActivities = async (day) => {
     if (!user) return;
@@ -88,16 +119,17 @@ export default function CalendarScreen() {
           onDayPress={(day) => {
             setSelectedDay(day.dateString);
             fetchActivities(day.dateString);}}
-          markedDates={{
-            [selectedDay]: { selected: true, selectedColor: "blue" },
-          }}
-          theme={{
-            todayTextColor: "red",
-            arrowColor: "gray",
-            textDayFontWeight: "600",
-            selectedDayBackgroundColor: "blue",
-            dotColor: "blue",
-          }}
+            markedDates={{
+              ...markedDates,
+              [selectedDay]: { selected: true, selectedColor: "blue", ...markedDates[selectedDay] },
+            }}
+            theme={{
+              todayTextColor: "red",
+              arrowColor: "gray",
+              textDayFontWeight: "600",
+              selectedDayBackgroundColor: "blue",
+              dotColor: "blue",
+            }}
         />
       </View>
 
