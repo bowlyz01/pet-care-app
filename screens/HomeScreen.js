@@ -1,9 +1,9 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState,useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { signOut, getAuth } from 'firebase/auth'
 import { db } from '../config/firebase'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import AddButton from '../components/AddButton'
 import PetCard from "../components/PetCard";
 import { collection, getDocs, query, where } from "firebase/firestore"; 
@@ -46,6 +46,13 @@ export default function HomeScreen() {
   useEffect(() => {
     fetchPetData();
   }, [currentUser]); // ทำงานใหม่เมื่อ user เปลี่ยน
+
+    // รีโหลดข้อมูลเมื่อกลับมาที่หน้า HomeScreen
+    useFocusEffect(
+      useCallback(() => {
+        fetchPetData();
+      }, [])
+    );
 
   return (
     <SafeAreaView className="flex-1">
