@@ -125,7 +125,7 @@ const VaccinationsDetailsScreen = () => {
         <View className="flex-1 bg-white p-4">
           <Text className="text-lg font-semibold text-gray-700 mb-2">The pet's vaccinations</Text>
 
-          <Text className="text-lg font-semibold text-gray-700">What the vaccine:</Text>
+          <Text className="text-lg font-semibold text-gray-700">Vaccine Type:</Text>
           <TextInput
             className="border border-gray-300 p-3 rounded-xl mb-4"
             placeholder="Vaccine"
