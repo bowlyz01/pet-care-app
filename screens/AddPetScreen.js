@@ -191,7 +191,6 @@ export default function AddPetScreen() {
           mode="date"
           display="default"
           onChange={(event, date) => {
-            setShowPicker(false);
             if (date) setSelectedDate(date);
           }}
         />

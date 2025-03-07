@@ -147,7 +147,6 @@ export default function AddActivityScreen() {
             mode="date"
             display="default"
             onChange={(event, date) => {
-              setShowDatePicker(false);
               if (date) setSelectedDate(date);
             }}
           />
@@ -169,7 +168,6 @@ export default function AddActivityScreen() {
             display="default"
             is24Hour={true}
             onChange={(event, time) => {
-              setShowTimePicker(false);
               if (time) setSelectedTime(time);
             }}
           />
