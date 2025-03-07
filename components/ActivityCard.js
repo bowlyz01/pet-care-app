@@ -8,7 +8,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring, runOnJS, interp
 import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 
-export default function ActivitiesCard({ id, startTime, endTime, name, petId, points,status, onDelete }) {
+export default function ActivitiesCard({ id, startTime, endTime, name, petId, points, status, onDelete }) {
   const translateX = useSharedValue(0);
 
   const [petName, setPetName] = useState("Loading..."); // รอโหลดชื่อสัตว์
@@ -46,10 +46,21 @@ export default function ActivitiesCard({ id, startTime, endTime, name, petId, po
   }));
 
   const handleGesture = (event) => {
+    if (status === "Expired") {
+      // ไม่ให้สไลด์หากสถานะเป็น "Expired"
+      translateX.value = 0;
+      return;
+    }
     translateX.value = event.nativeEvent.translationX;
   };
 
   const handleGestureEnd = () => {
+    if (status === "Expired") {
+      // ถ้าสถานะเป็น "Expired" ให้ไม่สามารถลบได้
+      translateX.value = withSpring(0);
+      return;
+    }
+
     if (translateX.value < -100) {
       runOnJS(confirmDelete)();
     } else {
@@ -74,7 +85,6 @@ export default function ActivitiesCard({ id, startTime, endTime, name, petId, po
         return "#999"; // เทา (ค่าเริ่มต้น)
     }
   };
-
 
   const confirmDelete = () => {
     Alert.alert(
