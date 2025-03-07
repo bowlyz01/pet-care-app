@@ -6,14 +6,31 @@ import {
 } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, runOnJS, interpolate } from "react-native-reanimated";
 import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import dayjs from 'dayjs';
+
+const activityData = {
+  Walking: { points: 20, duration: 60},
+  Feeding: { points: 20, duration: 10},
+  Training: { points: 10, duration: 20},
+  Playing: { points: 10, duration: 15},
+  Other: { points: 5, duration: 30},
+};
 
 export default function ActivitiesCard({ id, startTime, endTime, name, petId, points, status, onDelete }) {
   const translateX = useSharedValue(0);
 
   const [petName, setPetName] = useState("Loading..."); // รอโหลดชื่อสัตว์
 
-  // ดึงชื่อสัตว์จาก Firestore
+  // คำนวณเวลาสิ้นสุดจากเวลาเริ่มต้นและระยะเวลา
+  const calculateEndTime = (startTime, duration) => {
+    // Combine the startTime with today's date, so dayjs can parse it correctly
+    const startDateTime = dayjs().format("YYYY-MM-DD") + " " + startTime; // Combine with today's date
+    return dayjs(startDateTime).add(duration, "minute").format("HH:mm");
+  };
+  
+
+  // // ดึงชื่อสัตว์จาก Firestore
   useEffect(() => {
     const fetchPetName = async () => {
       try {
@@ -97,6 +114,45 @@ export default function ActivitiesCard({ id, startTime, endTime, name, petId, po
     );
   };
 
+  const handleCardPress = () => {
+    if (status === "Pending") {
+      Alert.alert(
+        "Start Activity",
+        `Do you want to start the activity "${name}"?`,
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Start", style: "default", onPress: startActivity },
+        ]
+      );
+    }
+  };
+
+  const startActivity = async () => {
+    try {
+      const currentTime = new Date();
+      const currentDate = currentTime.toISOString().split("T")[0];  // เอาแค่วันที่ (YYYY-MM-DD)
+    
+      // แปลงเวลาเป็นรูปแบบ "HH:mm"
+      const formattedStartTime = dayjs(currentTime).format("HH:mm");
+      const formattedEndTime = calculateEndTime(formattedStartTime, activityData[name].duration);
+      
+
+      // อัพเดตข้อมูลกิจกรรมใน Firestore
+      const db = getFirestore();
+      const activityRef = doc(db, "activities", id);
+      await updateDoc(activityRef, {
+        status: "Active",
+        startTime: formattedStartTime,
+        endTime: formattedEndTime,
+      });
+
+      Alert.alert("Activity Started", `"${name}" of ${petName} has been started at ${formattedStartTime} and will end at ${formattedEndTime}.`);
+    } catch (error) {
+      console.error("Error starting activity:", error);
+      Alert.alert("Error", "An error occurred while starting the activity.");
+    }
+  };
+
   return (
     <GestureHandlerRootView>
       <View style={styles.container}>
@@ -109,7 +165,7 @@ export default function ActivitiesCard({ id, startTime, endTime, name, petId, po
 
         {/* การ์ดที่เลื่อนได้ */}
         <PanGestureHandler onGestureEvent={handleGesture} onEnded={handleGestureEnd}>
-          <Animated.View style={[styles.card, animatedStyle]}>
+          <Animated.View style={[styles.card, animatedStyle]} onTouchEnd={handleCardPress}>
             {/* ไอคอนหัวใจในวงกลมแดง */}
             <View style={[styles.iconContainer, { backgroundColor: getStatusColor(status) }]}>
               <FontAwesome name="heart" size={24} color="white" />
