@@ -75,6 +75,12 @@ export default function AddActivityScreen() {
   };
 
   const saveActivityToFirebase = async () => {
+    // ตรวจสอบว่าผู้ใช้เลือกสัตว์เลี้ยงแล้วหรือไม่
+    if (!selectedPetID) {
+      alert("Please select your pet before saving the activity.");
+      return;
+    }
+    
     const activityType = selectedActivity === "Other" ? customActivity : selectedActivity;
     if (!activityType) {
       alert("Please select or enter an activity type.");
