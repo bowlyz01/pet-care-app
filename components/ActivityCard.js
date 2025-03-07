@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Pressable, Alert } from "react-native";
+import { View, Text, StyleSheet, Pressable, Alert, TextInput } from "react-native";
 import {
   PanGestureHandler,
   GestureHandlerRootView,
@@ -7,35 +7,38 @@ import {
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, runOnJS, interpolate } from "react-native-reanimated";
 import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
+import Modal from "react-native-modal";
 
 const activityData = {
-  Walking: { points: 20, duration: 60},
-  Feeding: { points: 20, duration: 10},
-  Training: { points: 10, duration: 20},
-  Playing: { points: 10, duration: 15},
-  Other: { points: 5, duration: 30},
+  Walking: { points: 20, duration: 60 },
+  Feeding: { points: 20, duration: 10 },
+  Training: { points: 10, duration: 20 },
+  Playing: { points: 10, duration: 15 },
+  Other: { points: 5, duration: 30 },
 };
 
-export default function ActivitiesCard({ id, startTime, endTime, name, petId, points, status, onDelete }) {
+export default function ActivitiesCard({
+  id,
+  startTime,
+  endTime,
+  name,
+  petId,
+  points,
+  status,
+  onDelete,
+}) {
   const translateX = useSharedValue(0);
+  const [petName, setPetName] = useState("Loading...");
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [formattedStartTime, setFormattedStartTime] = useState("");
+  const [formattedEndTime, setFormattedEndTime] = useState("");
 
-  const [petName, setPetName] = useState("Loading..."); // รอโหลดชื่อสัตว์
-
-  // คำนวณเวลาสิ้นสุดจากเวลาเริ่มต้นและระยะเวลา
-  const calculateEndTime = (startTime, duration) => {
-    // Combine the startTime with today's date, so dayjs can parse it correctly
-    const startDateTime = dayjs().format("YYYY-MM-DD") + " " + startTime; // Combine with today's date
-    return dayjs(startDateTime).add(duration, "minute").format("HH:mm");
-  };
-  
-
-  // // ดึงชื่อสัตว์จาก Firestore
   useEffect(() => {
     const fetchPetName = async () => {
       try {
         const db = getFirestore();
-        const petRef = doc(db, "pets", petId); // ดึงข้อมูลจาก collection "pets"
+        const petRef = doc(db, "pets", petId);
         const petSnap = await getDoc(petRef);
 
         if (petSnap.exists()) {
@@ -52,7 +55,21 @@ export default function ActivitiesCard({ id, startTime, endTime, name, petId, po
     if (petId) {
       fetchPetName();
     }
-  }, [petId]); // โหลดใหม่เมื่อ petId เปลี่ยน
+  }, [petId]);
+
+  useEffect(() => {
+    const calculateTime = () => {
+      const currentTime = dayjs();
+      const startTime = currentTime.format("HH:mm");
+      const endTime = currentTime.add(activityData[name].duration, "minute").format("HH:mm");
+      setFormattedStartTime(startTime);
+      setFormattedEndTime(endTime);
+    };
+
+    if (isModalVisible) {
+      calculateTime();
+    }
+  }, [isModalVisible, name]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -64,7 +81,6 @@ export default function ActivitiesCard({ id, startTime, endTime, name, petId, po
 
   const handleGesture = (event) => {
     if (status === "Expired") {
-      // ไม่ให้สไลด์หากสถานะเป็น "Expired"
       translateX.value = 0;
       return;
     }
@@ -73,7 +89,6 @@ export default function ActivitiesCard({ id, startTime, endTime, name, petId, po
 
   const handleGestureEnd = () => {
     if (status === "Expired") {
-      // ถ้าสถานะเป็น "Expired" ให้ไม่สามารถลบได้
       translateX.value = withSpring(0);
       return;
     }
@@ -87,57 +102,36 @@ export default function ActivitiesCard({ id, startTime, endTime, name, petId, po
 
   const getStatusColor = (status) => {
     switch (status) {
-
       case "Created":
-        return "#999"; // เทา
+        return "#999"; // gray
       case "Active":
-        return "#45BCD8"; // ฟ้า
+        return "#45BCD8"; // blue
       case "Finished":
-        return "#22C55E"; // เขียว
+        return "#22C55E"; // green
       case "Pending":
-        return "#FFD701"; // เหลือง
+        return "#FFD701"; // yellow
       case "Expired":
-        return "#EE443F"; // แดง
+        return "#EE443F"; // red
       default:
-        return "#999"; // เทา (ค่าเริ่มต้น)
+        return "#999"; // gray (default)
     }
   };
 
   const confirmDelete = () => {
-    Alert.alert(
-      "Confirm Deletion",
-      `Do you want to delete \"${name}\"?`,
-      [
-        { text: "Cancel", style: "cancel", onPress: () => (translateX.value = withSpring(0)) },
-        { text: "Delete", style: "destructive", onPress: () => onDelete(id, "Delete") },
-      ]
-    );
+    Alert.alert("Confirm Deletion", `Do you want to delete "${name}"?`, [
+      { text: "Cancel", style: "cancel", onPress: () => (translateX.value = withSpring(0)) },
+      { text: "Delete", style: "destructive", onPress: () => onDelete(id, "Delete") },
+    ]);
   };
 
   const handleCardPress = () => {
     if (status === "Pending") {
-      Alert.alert(
-        "Start Activity",
-        `Do you want to start the activity "${name}"?`,
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Start", style: "default", onPress: startActivity },
-        ]
-      );
+      setModalVisible(true);
     }
   };
 
   const startActivity = async () => {
     try {
-      const currentTime = new Date();
-      const currentDate = currentTime.toISOString().split("T")[0];  // เอาแค่วันที่ (YYYY-MM-DD)
-    
-      // แปลงเวลาเป็นรูปแบบ "HH:mm"
-      const formattedStartTime = dayjs(currentTime).format("HH:mm");
-      const formattedEndTime = calculateEndTime(formattedStartTime, activityData[name].duration);
-      
-
-      // อัพเดตข้อมูลกิจกรรมใน Firestore
       const db = getFirestore();
       const activityRef = doc(db, "activities", id);
       await updateDoc(activityRef, {
@@ -146,39 +140,38 @@ export default function ActivitiesCard({ id, startTime, endTime, name, petId, po
         endTime: formattedEndTime,
       });
 
-      Alert.alert("Activity Started", `"${name}" of ${petName} has been started at ${formattedStartTime} and will end at ${formattedEndTime}.`);
+      setModalVisible(false);
+
+      alert(
+        `"${name}" of ${petName} has been started at ${formattedStartTime} and will end at ${formattedEndTime}.`
+      );
     } catch (error) {
       console.error("Error starting activity:", error);
-      Alert.alert("Error", "An error occurred while starting the activity.");
+      alert("An error occurred while starting the activity.");
     }
   };
 
   return (
     <GestureHandlerRootView>
       <View style={styles.container}>
-        {/* พื้นหลังแดง + ไอคอนถังขยะ */}
         <View style={styles.deleteBackground}>
           <Animated.View style={[styles.trashIcon, iconOpacity]}>
             <MaterialIcons name="delete" size={24} color="white" />
           </Animated.View>
         </View>
 
-        {/* การ์ดที่เลื่อนได้ */}
         <PanGestureHandler onGestureEvent={handleGesture} onEnded={handleGestureEnd}>
           <Animated.View style={[styles.card, animatedStyle]} onTouchEnd={handleCardPress}>
-            {/* ไอคอนหัวใจในวงกลมแดง */}
             <View style={[styles.iconContainer, { backgroundColor: getStatusColor(status) }]}>
               <FontAwesome name="heart" size={24} color="white" />
             </View>
 
-            {/* ข้อมูลกิจกรรม */}
             <View style={styles.infoContainer}>
               <Text style={styles.timeText}>{startTime} - {endTime}</Text>
               <Text style={styles.activityName}>{name}</Text>
               <Text style={styles.activityName}>{petName}</Text>
             </View>
 
-            {/* คะแนน */}
             <View style={styles.pointsContainer}>
               <Text style={styles.pointsText}>{points} points</Text>
               <FontAwesome name="heart" size={16} color="#FFB6C1" />
@@ -186,6 +179,57 @@ export default function ActivitiesCard({ id, startTime, endTime, name, petId, po
           </Animated.View>
         </PanGestureHandler>
       </View>
+
+      {/* Custom Modal */}
+      <Modal isVisible={isModalVisible} onBackdropPress={() => setModalVisible(false)}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>
+            Start Activity: {name} for {petName}
+          </Text>
+          <Text style={styles.modalDescription}>
+            Do you want to start the activity? It will last for {activityData[name].duration} minutes.
+          </Text>
+
+          {/* Start Time */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Start Time</Text>
+            <TextInput
+              style={styles.inputField}
+              value={formattedStartTime}
+              editable={false}
+            />
+          </View>
+
+          {/* End Time */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>End Time</Text>
+            <TextInput
+              style={styles.inputField}
+              value={formattedEndTime}
+              editable={false}
+            />
+          </View>
+
+          {/* Heart Score */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Heart Score</Text>
+            <TextInput
+              style={styles.inputField}
+              value={`${points} points 🩷`}
+              editable={false}
+            />
+          </View>
+
+          <View style={styles.modalButtons}>
+            <Pressable style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </Pressable>
+            <Pressable style={styles.startButton} onPress={startActivity}>
+              <Text style={styles.startText}>Start</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </GestureHandlerRootView>
   );
 }
@@ -193,7 +237,6 @@ export default function ActivitiesCard({ id, startTime, endTime, name, petId, po
 const styles = StyleSheet.create({
   container: {
     borderRadius: 12,
-    // overflow: "hidden",
     marginVertical: 8,
   },
   deleteBackground: {
@@ -217,11 +260,11 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#fff",
     borderRadius: 12,
-    elevation: 6, // เพิ่มเงาบน Android
+    elevation: 6,
     shadowColor: "#000",
-    shadowOpacity: 0.2, 
-    shadowRadius: 6, 
-    shadowOffset: { width: 0, height: 4 }, 
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 4 },
   },
   iconContainer: {
     width: 50,
@@ -255,5 +298,65 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginRight: 5,
     color: "#666",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalDescription: {
+    fontSize: 14,
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  inputGroup: {
+    marginBottom: 12,
+    width: "100%",
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 6,
+    color: "#333",
+  },
+  inputField: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: "#f9f9f9",
+    width: "100%",
+    fontSize: 16,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  cancelButton: {
+    backgroundColor: "#ccc",
+    padding: 10,
+    borderRadius: 5,
+    width: "45%",
+  },
+  cancelText: {
+    textAlign: "center",
+    color: "#333",
+  },
+  startButton: {
+    backgroundColor: "#45BCD8",
+    padding: 10,
+    borderRadius: 5,
+    width: "45%",
+  },
+  startText: {
+    textAlign: "center",
+    color: "white",
   },
 });
