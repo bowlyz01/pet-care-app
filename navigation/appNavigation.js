@@ -18,7 +18,7 @@ import useAuth from '../hooks/useAuth';
 import BottomTabs from '../navigation/BottomTabs';
 import AddActivity from '../screens/AddActivityScreen';
 import FindClinicScreen from '../screens/FindClinicScreen';
-
+import ActivityOverdueScreen from '../screens/ActivityOverdueScreen';
 const Stack = createNativeStackNavigator();
 
 
@@ -40,6 +40,7 @@ export default function AppNavigation() {
           <Stack.Screen name="HealthDetails" options={{headerShown: false}} component={HealthDetailsScreen} />
           <Stack.Screen name="FindClinic" options={{headerShown: false}} component={FindClinicScreen} />
           <Stack.Screen name="Profile" options={{headerShown: false}} component={ProfileScreen} />
+          <Stack.Screen name="ActivityOverdue" options={{headerShown: false}} component={ActivityOverdueScreen} />
 
         </Stack.Navigator>
       </NavigationContainer>
