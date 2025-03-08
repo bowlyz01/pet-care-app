@@ -102,16 +102,21 @@ export default function CalendarScreen() {
       console.log("End Time:", endTime);
       
       // ถ้ากิจกรรมเลยวันที่ปัจจุบันไปแล้ว (activityDate < currentDate)
-    if (activityDate < currentDate && activity.status !== 'Expired') {
+    if (activityDate < currentDate && activity.status !== 'Expired' && activity.status !== 'Finished' && activity.status !== 'Expired') {
       console.log("Activity expired by date, updating status...");
       updateActivityStatus(activity.id, 'Expired');  // เปลี่ยนสถานะเป็น "Expired"
     }
     // ถ้าเป็นวันเดียวกัน ให้เช็คเวลา
     else if (activityDate === currentDate) {
-      if (currentFormattedTime > endTime && activity.status !== 'Expired') {
+      if (currentFormattedTime > endTime && activity.status !== 'Active' && activity.status !== 'Finished' && activity.status !== 'Expired') {
         console.log("Activity expired by time, updating status...");
         updateActivityStatus(activity.id, 'Expired'); // เปลี่ยนสถานะเป็น "Expired"
-      } else if (currentFormattedTime > startTime && currentFormattedTime < endTime && activity.status !== 'Pending') {
+      } // Check if the activity is "Active" and if the current time is past the end time
+      else if (currentFormattedTime > endTime && activity.status === 'Active') {
+        console.log("Activity finished, updating status...");
+        updateActivityStatus(activity.id, 'Finished'); // Update to "Finished"
+      }
+      else if (currentFormattedTime > startTime && currentFormattedTime < endTime && activity.status !== 'Active') {
         console.log("Activity pending, updating status...");
         updateActivityStatus(activity.id, 'Pending'); // เปลี่ยนสถานะเป็น "Pending"
       }
