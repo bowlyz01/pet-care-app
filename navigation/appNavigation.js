@@ -19,6 +19,7 @@ import BottomTabs from '../navigation/BottomTabs';
 import AddActivity from '../screens/AddActivityScreen';
 import FindClinicScreen from '../screens/FindClinicScreen';
 import ActivityOverdueScreen from '../screens/ActivityOverdueScreen';
+import PetDailyPointsScreen from '../screens/InfoPet/PetDailyPointsDetails';
 const Stack = createNativeStackNavigator();
 
 
@@ -41,6 +42,7 @@ export default function AppNavigation() {
           <Stack.Screen name="FindClinic" options={{headerShown: false}} component={FindClinicScreen} />
           <Stack.Screen name="Profile" options={{headerShown: false}} component={ProfileScreen} />
           <Stack.Screen name="ActivityOverdue" options={{headerShown: false}} component={ActivityOverdueScreen} />
+          <Stack.Screen name="PetDailyPoints" options={{headerShown: false}} component={PetDailyPointsScreen} />
 
         </Stack.Navigator>
       </NavigationContainer>
