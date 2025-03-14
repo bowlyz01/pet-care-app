@@ -8,7 +8,7 @@ import { Calendar } from "react-native-calendars";
 import AddActivity from "../components/AddActivity";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { db } from "../config/firebase";
-import { collection, query, where, getDocs, deleteDoc, doc,updateDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, deleteDoc, doc,updateDoc, getDoc, setDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import dayjs from 'dayjs';
 
@@ -82,18 +82,18 @@ export default function CalendarScreen() {
       console.error("Error fetching activities:", error);
     }
   };
-  
+    
   const checkExpiredStatus = (activitiesList) => {
     const currentTime = new Date();
     const currentDate = currentTime.toISOString().split("T")[0];  // เอาแค่วันที่ (YYYY-MM-DD)
-  
+    
     // แปลงเวลาเป็นรูปแบบ "HH:mm"
     const currentFormattedTime = dayjs(currentTime).format("HH:mm");
-
+    
     activitiesList.forEach(activity => {
       const endTime = activity.endTime; // เวลาสิ้นสุด
       const startTime = activity.startTime; // เวลาเริ่มต้น
-      
+    
       const activityDate = activity.date; // กิจกรรมที่ถูกเก็บไว้ใน date (ซึ่งเป็นวันที่)
       console.log("Activity Date:", activityDate);
       console.log("Current Date:", currentDate);
@@ -103,54 +103,62 @@ export default function CalendarScreen() {
       
       // ถ้ากิจกรรมเลยวันที่ปัจจุบันไปแล้ว (activityDate < currentDate)
     if (activityDate < currentDate && activity.status !== 'Expired' && activity.status !== 'Finished' && activity.status !== 'Expired') {
-      console.log("Activity expired by date, updating status...");
-      updateActivityStatus(activity.id, 'Expired');  // เปลี่ยนสถานะเป็น "Expired"
-    }
-    // ถ้าเป็นวันเดียวกัน ให้เช็คเวลา
-    else if (activityDate === currentDate) {
+        console.log("Activity expired by date, updating status...");
+        updateActivityStatus(activity.id, 'Expired');  // เปลี่ยนสถานะเป็น "Expired"
+      }
+      // ถ้าเป็นวันเดียวกัน ให้เช็คเวลา
+      else if (activityDate === currentDate) {
       if (currentFormattedTime > endTime && activity.status !== 'Active' && activity.status !== 'Finished' && activity.status !== 'Expired') {
-        console.log("Activity expired by time, updating status...");
-        updateActivityStatus(activity.id, 'Expired'); // เปลี่ยนสถานะเป็น "Expired"
+          console.log("Activity expired by time, updating status...");
+          updateActivityStatus(activity.id, 'Expired'); // เปลี่ยนสถานะเป็น "Expired"
       } // Check if the activity is "Active" and if the current time is past the end time
-      else if (currentFormattedTime > endTime && activity.status === 'Active') {
-        console.log("Activity finished, updating status...");
-        updateActivityStatus(activity.id, 'Finished'); // Update to "Finished"
+        else if (currentFormattedTime > endTime && activity.status === 'Active') {
+          console.log("Activity finished, updating status...");
+          updateActivityStatus(activity.id, 'Finished'); // Update to "Finished"
+        }
+        else if (currentFormattedTime > startTime && currentFormattedTime < endTime && activity.status !== 'Active') {
+          console.log("Activity pending, updating status...");
+          updateActivityStatus(activity.id, 'Pending'); // เปลี่ยนสถานะเป็น "Pending"
+        }
       }
-      else if (currentFormattedTime > startTime && currentFormattedTime < endTime && activity.status !== 'Active') {
-        console.log("Activity pending, updating status...");
-        updateActivityStatus(activity.id, 'Pending'); // เปลี่ยนสถานะเป็น "Pending"
-      }
-    }
     });
   };
-  
-  
-  const updateActivityStatus = async (activityId, newStatus) => {
-    try {
-      // อัพเดตสถานะกิจกรรมใน Firestore
-      const activityRef = doc(db, "activities", activityId);
-      await updateDoc(activityRef, {
-        status: newStatus,
-      });
-  
-      // อัพเดตสถานะใน state
-      setActivities(prevActivities => {
-        const updatedActivities = { ...prevActivities };
-        for (let day in updatedActivities) {
-          updatedActivities[day] = updatedActivities[day].map(activity => {
-            if (activity.id === activityId) {
-              return { ...activity, status: newStatus };
-            }
-            return activity;
-          });
-        }
-        return updatedActivities;
-      });
-    } catch (error) {
-      console.error("Error updating activity status:", error);
+
+
+// เมื่อเปลี่ยนสถานะกิจกรรมเป็น 'Finished' ในการอัพเดตกิจกรรม
+const updateActivityStatus = async (activityId, newStatus) => {
+  try {
+    // 🔹 ดึงข้อมูลกิจกรรมจาก Firestore โดยตรง
+    const activityRef = doc(db, "activities", activityId);
+    const activitySnapshot = await getDoc(activityRef);
+
+    if (!activitySnapshot.exists()) {
+      console.error("❌ Activity not found in Firestore for ID:", activityId);
+      return;
     }
-  };
-  
+
+    const activity = { id: activitySnapshot.id, ...activitySnapshot.data() };
+
+    // 🔹 อัปเดตสถานะกิจกรรมใน Firestore
+    await updateDoc(activityRef, { status: newStatus });
+
+    // 🔹 อัปเดต state ให้ตรงกับ Firestore
+    setActivities(prevActivities => {
+      const updatedActivities = { ...prevActivities };
+      for (let day in updatedActivities) {
+        updatedActivities[day] = updatedActivities[day].map(a =>
+          a.id === activityId ? { ...a, status: newStatus } : a
+        );
+      }
+      return updatedActivities;
+    });
+
+    console.log("✅ Activity status updated:", { activityId, newStatus });
+
+  } catch (error) {
+    console.error("❌ Error updating activity status:", error);
+  }
+};
     
 
   const handleDelete = async (selectedDay, activityId, newStatus) => {
