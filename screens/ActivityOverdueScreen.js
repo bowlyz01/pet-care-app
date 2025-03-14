@@ -1,149 +1,119 @@
-import { View, Text, ScrollView, StyleSheet, Alert } from "react-native";
-import React, { useState, useEffect, useCallback } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import BackButton from "../components/BackButton";
-import ActivitiesCard from "../components/ActivityCard";
-import { Calendar } from "react-native-calendars";
-import AddActivity from "../components/AddActivity";
-import { db } from "../config/firebase";
-import { collection, query, where, getDocs, doc } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { View, Text, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Table, Row, Rows } from 'react-native-table-component';
+import { db } from '../config/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import DropDownPicker from 'react-native-dropdown-picker';
+import BackButton from '../components/BackButton';
 
 export default function ActivityOverdueScreen() {
-  const navigation = useNavigation();
-  const today = new Date().toISOString().split("T")[0];
-  const [selectedDay, setSelectedDay] = useState(today);
-  const [activities, setActivities] = useState({});
-  const [markedDates, setMarkedDates] = useState({});
+  const [activities, setActivities] = useState([]);
+  const [filteredActivities, setFilteredActivities] = useState([]);
+  const [searchText, setSearchText] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('All');
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState([
+    { label: 'All', value: 'All' },
+    { label: 'Walking', value: 'Walking' },
+    { label: 'Feeding', value: 'Feeding' },
+    { label: 'Training', value: 'Training' },
+    { label: 'Playing', value: 'Playing' },
+    { label: 'Other', value: 'Other' },
+  ]);
+
+  const tableHead = ["Activity Type", "Date", "Start Time", "End Time"];
+  const columnWidths = [120, 100, 100, 100];
 
   const auth = getAuth();
   const user = auth.currentUser;
 
-  useFocusEffect(
-    useCallback(() => {
-      setSelectedDay(today);
-    }, [today])
-  );
-
-  // Load data when the screen loads
   useEffect(() => {
-    fetchMarkedDates();
+    if (user) {
+      fetchActivities();
+    }
   }, [user]);
 
-  // Fetch all activities for the user and set dates with a blue dot for "Expired" status
-  const fetchMarkedDates = async () => {
-    if (!user) return;
+  useEffect(() => {
+    applyFilters();
+  }, [activities, searchText, selectedFilter]);
 
+  const fetchActivities = async () => {
     try {
-      const q = query(collection(db, "activities"), where("userId", "==", user.uid));
+      const q = query(
+        collection(db, "activities"),
+        where("userId", "==", user.uid),
+        where("status", "==", "Expired")
+      );
       const querySnapshot = await getDocs(q);
-
-      let datesWithActivities = {};
-      querySnapshot.forEach(doc => {
-        const activityDate = doc.data().date;
-        const activityStatus = doc.data().status;
-
-        // Only mark dates with "Expired" status
-        if (activityDate && activityStatus === "Expired") {
-          datesWithActivities[activityDate] = {
-            marked: true,
-            dotColor: "blue", // Blue dot for expired activities
-          };
-        }
+      let activitiesList = [];
+      querySnapshot.forEach((doc) => {
+        activitiesList.push({ id: doc.id, ...doc.data() });
       });
-
-      setMarkedDates(datesWithActivities);
-    } catch (error) {
-      console.error("Error fetching marked dates:", error);
-    }
-  };
-
-  const fetchActivities = async (day) => {
-    if (!user) return;
-
-    try {
-      const q = query(collection(db, "activities"), where("userId", "==", user.uid), where("date", "==", day));
-      const querySnapshot = await getDocs(q);
-      const activitiesList = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        startTime: doc.data().startTime || "00:00",
-        endTime: doc.data().endTime || "00:00",
-      }));
-
-      setActivities(prev => ({ ...prev, [day]: activitiesList }));
+      setActivities(activitiesList);
     } catch (error) {
       console.error("Error fetching activities:", error);
     }
   };
 
+  const applyFilters = () => {
+    let filtered = activities;
+    if (selectedFilter !== 'All') {
+      filtered = filtered.filter(act => act.activityType === selectedFilter);
+    }
+    if (searchText.trim() !== '') {
+      filtered = filtered.filter(act => act.activityType.toLowerCase().includes(searchText.toLowerCase()));
+    }
+    setFilteredActivities(filtered);
+  };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-      <View className="flex-row justify-between items-center px-4 py-2">
+    <SafeAreaView className="flex-1 bg-white p-4">
+      <View className="flex-row justify-between items-center">
         <BackButton />
-      </View>
-      <View className="flex-row justify-center items-center">
-        <Text className="text-lg font-bold">Activity Overdue</Text>
+        <Text className="text-xl font-bold">Overdue Activities</Text>
       </View>
 
-      <View style={styles.calendarContainer}>
-        <Calendar
-          onDayPress={(day) => {
-            setSelectedDay(day.dateString);
-            fetchActivities(day.dateString);
-          }}
-          markedDates={{
-            ...markedDates,
-            [selectedDay]: { selected: true, selectedColor: "blue", ...markedDates[selectedDay] },
-          }}
-          theme={{
-            todayTextColor: "red",
-            arrowColor: "gray",
-            textDayFontWeight: "600",
-            selectedDayBackgroundColor: "blue",
-            dotColor: "blue",
-          }}
+      {/* Search & Filter */}
+      <View className="flex-row justify-between items-center my-4">
+        <TextInput
+          placeholder="Search Activity..."
+          value={searchText}
+          onChangeText={setSearchText}
+          className="flex-1 border p-2 rounded"
         />
+        <View className="w-40 ml-2">
+          <DropDownPicker
+            open={open}
+            value={selectedFilter}
+            items={items}
+            setOpen={setOpen}
+            setValue={setSelectedFilter}
+            setItems={setItems}
+            containerStyle={{ height: 40 }}
+            style={{ backgroundColor: '#fafafa' }}
+          />
+        </View>
       </View>
 
-      <ScrollView style={styles.activitiesContainer}>
-        <View className="flex-row justify-between items-center">
-          <Text style={styles.activitiesHeader}>
-            {selectedDay ? `Expired Activities for ${selectedDay}` : "Select a day to view activities"}
-          </Text>
-          <AddActivity selectedDay={selectedDay} />
+      <ScrollView horizontal>
+        <View>
+          <Table borderStyle={{ borderWidth: 1, borderColor: "#C1C0B9" }}>
+            <Row
+              data={tableHead}
+              widthArr={columnWidths}
+              style={{ height: 50, backgroundColor: "#f1f8ff" }}
+              textStyle={{ margin: 6, fontWeight: "bold", textAlign: "center" }}
+            />
+            <Rows
+              data={filteredActivities.map(act => [act.activityType, act.date, act.startTime, act.endTime])}
+              widthArr={columnWidths}
+              textStyle={{ margin: 6, textAlign: "center" }}
+            />
+          </Table>
         </View>
-
-        {selectedDay && activities[selectedDay]?.filter(activity => activity.status === "Expired").length > 0 ? (
-          activities[selectedDay]
-            .filter(activity => activity.status === "Expired") // Filter activities with "Expired" status
-            .map((activity, idx) => (
-              <ActivitiesCard
-                key={activity.id}
-                id={activity.id}
-                startTime={activity.startTime || "00:00"}
-                endTime={activity.endTime || "00:00"}
-                name={activity.activityType || "Unnamed Activity"}
-                petId={activity.petID || "Unknown Pet"}
-                points={activity.heartScore || 0}
-                status={activity.status || "Created"}
-              />
-            ))
-        ) : (
-          <Text style={styles.noActivities}>
-            {selectedDay ? "No expired activities for this day." : "Please select a date to see expired activities."}
-          </Text>
-        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  calendarContainer: { padding: 16, backgroundColor: "white", elevation: 2 },
-  activitiesContainer: { flex: 1, padding: 16 },
-  activitiesHeader: { fontSize: 16, fontWeight: "bold", marginBottom: 8 },
-  noActivities: { fontSize: 14, color: "gray", textAlign: "center", marginTop: 16 },
-});
