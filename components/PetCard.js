@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text } from "react-native";
 import dayjs from "dayjs";
 import InfoBlock from "./InfoBlock";
+import InfoHeart from "./InfoHeart";
 import Foundation from "@expo/vector-icons/Foundation";
 
 const PetCard = ({ pet }) => {
@@ -39,7 +40,6 @@ const PetCard = ({ pet }) => {
           <View>
             <Text className="text-xl font-bold text-white capitalize">{pet.name}</Text>
             <Text className="text-sm text-white">{calculateAge(pet.birthdate)}</Text>
-            {/* <Text className="text-sm text-white">{pet.age}</Text> */}
           </View>
         </View>
         <Foundation
@@ -51,7 +51,7 @@ const PetCard = ({ pet }) => {
 
       {/* Info Section */}
       <View className="flex-1 items-center justify-center ">
-        <InfoHart label="Heart Points Earned Today" value={pet.relationshipPoints} />
+        <InfoHeart petID={pet.id} />
       </View>
       <View className="flex-row flex-wrap  justify-between gap-4 p-4">
       <InfoBlock label="Weight" screenName="WeightDetails" petID={pet.id}/>
@@ -66,13 +66,5 @@ const PetCard = ({ pet }) => {
   );
 };
 
-
-const InfoHart = ({ label, value }) => (
-  <View className="bg-yellow-200 w-full h-24 mb-4 rounded-xl shadow-md items-center justify-center">
-    <Text className="text-3xl text-red-500 mb-2">{'\u2764'}</Text>
-    <Text className="text-sm font-medium text-gray-700">{label}</Text>
-    <Text className="text-lg font-bold text-gray-900">{value}</Text>
-  </View>
-);
 
 export default PetCard;
