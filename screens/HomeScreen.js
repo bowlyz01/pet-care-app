@@ -28,7 +28,9 @@ export default function HomeScreen() {
 
     try {
       const petsCollection = collection(db, 'pets');
-      const q = query(petsCollection, where("userId", "==", currentUser.uid)); // กรองตาม userId
+      const q = query(petsCollection, 
+        where("userId", "==", currentUser.uid), // กรองตาม userId
+        where("status", "==", "viewable"));     // กรองตามสถานะ viewable
       const petSnapshot = await getDocs(q);
       
       const petList = petSnapshot.docs.map((doc) => ({
