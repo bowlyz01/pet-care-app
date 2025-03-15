@@ -28,6 +28,8 @@ const InfoBlock = ({ label, screenName, petID }) => {
         const querySnapshot = await getDocs(q);
         const count = querySnapshot.size; // นับจำนวนวัคซีนที่บันทึกไว้
         setValue(count > 0 ? `${count}` : "0");
+      }else if (label === "Graph Analyze"){
+        setValue("");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
