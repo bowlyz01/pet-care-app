@@ -1,11 +1,16 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text,TouchableOpacity } from "react-native";
 import dayjs from "dayjs";
 import InfoBlock from "./InfoBlock";
 import InfoHeart from "./InfoHeart";
 import Foundation from "@expo/vector-icons/Foundation";
+import { useNavigation } from '@react-navigation/native';
+
 
 const PetCard = ({ pet }) => {
+  const navigation = useNavigation();
+  const petID = pet.id;
+
 
   // ฟังก์ชันคำนวณอายุ
   const calculateAge = (birthdate) => {
@@ -24,11 +29,15 @@ const PetCard = ({ pet }) => {
 
     return `${yearText} ${monthText} ${dayText}`.trim();
   }
-
+  const handlePress = () => {
+    navigation.navigate('PetDetails', { petID});
+  };
   
     
 
   return (
+    <TouchableOpacity
+      onPress={handlePress}>
     <View className="flex-1 bg-blue-50 shadow-lg rounded-2xl p-4 mb-4">
       {/* Header */}
       <View className="flex-row items-center justify-between bg-[#45BCD8] p-4 rounded-t-2xl mb-4">
@@ -63,6 +72,7 @@ const PetCard = ({ pet }) => {
         <InfoBlock label="Contacts" screenName="ContactsDetails" petID={pet.id}/> 
       </View>
     </View>
+    </TouchableOpacity>
   );
 };
 
