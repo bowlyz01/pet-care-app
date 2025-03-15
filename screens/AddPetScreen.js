@@ -81,6 +81,7 @@ export default function AddPetScreen() {
       weight: null,
       gender: petGender,
       birthdate,
+      status: "viewable",
     };
   
     try {
