@@ -52,7 +52,9 @@ export default function AddActivityScreen() {
       if (!user) return;
       
       try {
-        const petsQuery = query(collection(db, "pets"), where("userId", "==", user.uid));
+        const petsQuery = query(collection(db, "pets"), 
+        where("userId", "==", user.uid),
+        where("status", "==", "viewable"));
         const petDocs = await getDocs(petsQuery);
         const petList = petDocs.docs.map(doc => ({
           label: doc.data().name, // ชื่อสัตว์เลี้ยง
