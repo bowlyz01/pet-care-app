@@ -73,7 +73,7 @@ export default function RemindersDetailsScreen() {
     <SafeAreaView className="flex-1 bg-white p-4">
       <View className="flex-row justify-between items-center">
         <BackButton />
-        <Text className="text-xl font-bold">Overdue Activities</Text>
+        <Text className="text-xl font-bold">Activities</Text>
       </View>
 
       {/* Search & Filter */}
