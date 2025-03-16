@@ -63,7 +63,8 @@ export default function ActivityOverdueScreen() {
       filtered = filtered.filter(act => act.activityType === selectedFilter);
     }
     if (searchText.trim() !== '') {
-      filtered = filtered.filter(act => act.activityType.toLowerCase().includes(searchText.toLowerCase()));
+      filtered = filtered.filter(act => act.activityType.toLowerCase().includes(searchText.toLowerCase())||
+      act.date.toLowerCase().includes(searchText.toLowerCase()));
     }
     setFilteredActivities(filtered);
   };
