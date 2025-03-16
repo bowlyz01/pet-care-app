@@ -11,6 +11,8 @@ import { getAuth } from 'firebase/auth';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useNavigation } from '@react-navigation/native';
 import Foundation from '@expo/vector-icons/Foundation';
+import { Platform } from 'react-native';
+
 
 
 const petList = {
@@ -174,11 +176,13 @@ const PetDetailsScreen = () => {
                     value={petBirthdate}
                     mode="date"
                     display="default"
+                    maximumDate={new Date()} // ป้องกันการเลือกวันในอนาคต
                     onChange={(event, date) => {
-                        if (date) setPetBirthdate(date);
+                    if (date) setPetBirthdate(date);
+                    if (Platform.OS === 'android') setShowPicker(false); // ปิด Picker อัตโนมัติบน Android
                     }}
                 />
-            )}
+                )}
 
             <Text className="text-lg font-semibold text-gray-700">Gender</Text>
             <View className="flex-row justify-between mb-6">
