@@ -187,15 +187,17 @@ export default function AddPetScreen() {
         </TouchableOpacity>
 
         {showPicker && (
-        <DateTimePicker
-          value={selectedDate}
-          mode="date"
-          display="default"
-          onChange={(event, date) => {
-            if (date) setSelectedDate(date);
-          }}
-        />
-      )}
+          <DateTimePicker
+            value={selectedDate}
+            mode="date"
+            display="default"
+            maximumDate={new Date()} // ป้องกันการเลือกวันในอนาคต
+            onChange={(event, date) => {
+              if (date) setSelectedDate(date);
+              if (Platform.OS === 'android') setShowPicker(false); // ปิด Picker อัตโนมัติบน Android
+            }}
+          />
+        )}
 
         <Text className="text-lg font-semibold text-gray-700">Gender</Text>
         <View className="flex-row justify-between mb-6">
