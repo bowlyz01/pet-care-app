@@ -69,7 +69,7 @@ const PetCard = ({ pet }) => {
         <InfoBlock label="Graph Analyze" screenName="GraphAnalyzeDetails" petID={pet.id}/> 
         <InfoBlock label="Reminders" screenName="RemindersDetails" petID={pet.id}/>
         <InfoBlock label="Health Info" screenName="HealthDetails" petID={pet.id}/> 
-        <InfoBlock label="Contacts" screenName="ContactsDetails" petID={pet.id}/> 
+        <InfoBlock label="QR Code" screenName="PetQRCode" petID={pet.id}/> 
       </View>
     </View>
     </TouchableOpacity>
