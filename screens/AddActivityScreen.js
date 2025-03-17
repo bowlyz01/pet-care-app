@@ -10,6 +10,7 @@ import { db } from '../config/firebase';
 import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
+import { Platform } from 'react-native';
 
 
 const activityData = {
@@ -110,6 +111,24 @@ export default function AddActivityScreen() {
       alert("Failed to save activity.");
     }
   };
+
+  const handleDateChange = (event, date) => {
+    setShowDatePicker(false); // ซ่อน DatePicker หลังเลือกวันที่
+    if (date) {
+      setSelectedDate(date);
+      if (Platform.OS === "android") {
+        setShowTimePicker(true); // เปิด TimePicker ต่อทันที (Android เท่านั้น)
+      }
+    }
+  };
+
+  const handleTimeChange = (event, time) => {
+    setShowTimePicker(false); // ซ่อน TimePicker หลังเลือกเวลา
+    if (time) {
+      setSelectedTime(time);
+    }
+  };
+  
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white", paddingHorizontal: 20 }}>
       {/* ปุ่มย้อนกลับ */}
@@ -154,10 +173,9 @@ export default function AddActivityScreen() {
             value={selectedDate}
             mode="date"
             display="default"
-            onChange={(event, date) => {
-              if (date) setSelectedDate(date);
-            }}
-          />
+            minimumDate={new Date()} // ป้องกันการเลือกวันที่ย้อนหลัง
+            onChange={handleDateChange}
+          />        
         )}
 
         {/* เลือกเวลา */}
@@ -175,9 +193,7 @@ export default function AddActivityScreen() {
             mode="time"
             display="default"
             is24Hour={true}
-            onChange={(event, time) => {
-              if (time) setSelectedTime(time);
-            }}
+            onChange={handleTimeChange}
           />
         )}
       </View>
