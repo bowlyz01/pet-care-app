@@ -28,6 +28,7 @@ const AddDocument = () => {
 
   const [category, setCategory] = useState(null);
   const [notes, setNotes] = useState("");
+  const [name, setName] = useState("");
   const [image, setImage] = useState(null);
   const [open, setOpen] = useState(false); 
   const [loading, setLoading] = useState(false);
@@ -69,6 +70,10 @@ const AddDocument = () => {
   // 📌 ฟังก์ชันบันทึกข้อมูลลง Firestore
 
   const saveDocument = async () => {
+    if (!name) {
+      Alert.alert("Error", "Please enter a image name.");
+      return;
+    }
     if (!category) {
       Alert.alert("Error", "Please select a document category.");
       return;
@@ -112,6 +117,7 @@ const AddDocument = () => {
       await addDoc(collection(db, "documents"), {
         petID,
         category,
+        name,
         notes,
         ownerID: auth.currentUser.uid,
         imageUrl, // 👈 รูปเป็นค่าบังคับ
@@ -161,6 +167,15 @@ const AddDocument = () => {
           <Text className="text-gray-500">Click to Upload an Image</Text>
         )}
       </TouchableOpacity>
+
+      {/* Name*/}
+      <Text className="text-lg font-semibold">Images Name</Text>
+      <TextInput
+        placeholder="Type Here..."
+        className="border rounded-lg p-3 h-12 mb-4"
+        value={name}
+        onChangeText={setName}
+      />
 
       {/* Additional Information */}
       <Text className="text-lg font-semibold">Additional Information</Text>
