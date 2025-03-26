@@ -23,6 +23,7 @@ import PetDailyPointsScreen from '../screens/InfoPet/PetDailyPointsDetails';
 import AddDocucment from '../screens/AddDocument';
 import PetDetailsScreen from '../screens/InfoPet/PetDetails';
 import PetQRCodeScreen from '../screens/PetQrCode';
+import EditDocumentScreen from '../screens/EditDocumentScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -50,6 +51,7 @@ export default function AppNavigation() {
           <Stack.Screen name="AddDocument" options={{headerShown: false}} component={AddDocucment} />
           <Stack.Screen name="PetDetails" options={{headerShown: false}} component={PetDetailsScreen} />
           <Stack.Screen name="PetQRCode" options={{headerShown: false}} component={PetQRCodeScreen} />
+          <Stack.Screen name="EditDocument" options={{headerShown: false}} component={EditDocumentScreen} />
 
         </Stack.Navigator>
       </NavigationContainer>
