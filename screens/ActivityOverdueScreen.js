@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Table, Row, Rows } from 'react-native-table-component';
 import { db } from '../config/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, getDoc,doc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import DropDownPicker from 'react-native-dropdown-picker';
 import BackButton from '../components/BackButton';
@@ -23,8 +23,8 @@ export default function ActivityOverdueScreen() {
     { label: 'Other', value: 'Other' },
   ]);
 
-  const tableHead = ["Activity Type", "Date", "Start Time", "End Time"];
-  const columnWidths = [120, 100, 100, 100];
+  const tableHead = ["Pet Name", "Activity Type", "Date", "Start Time", "End Time"];
+  const columnWidths = [120, 120, 100, 100, 100];
 
   const auth = getAuth();
   const user = auth.currentUser;
@@ -48,9 +48,30 @@ export default function ActivityOverdueScreen() {
       );
       const querySnapshot = await getDocs(q);
       let activitiesList = [];
-      querySnapshot.forEach((doc) => {
-        activitiesList.push({ id: doc.id, ...doc.data() });
-      });
+  
+      for (const docSnapshot of querySnapshot.docs) {
+        let activityData = { id: docSnapshot.id, ...docSnapshot.data() };
+  
+        // ดึงข้อมูลชื่อสัตว์เลี้ยงจาก petID
+        if (activityData.petID) {
+          try {
+            const petRef = doc(db, "pets", activityData.petID); 
+            const petSnapshot = await getDoc(petRef);
+  
+            if (petSnapshot.exists()) {
+              activityData.petName = petSnapshot.data().name; 
+            } else {
+              activityData.petName = "Unknown"; 
+            }
+          } catch (petError) {
+            console.error("Error fetching pet:", petError);
+            activityData.petName = "Unknown"; 
+          }
+        }
+  
+        activitiesList.push(activityData);
+      }
+  
       setActivities(activitiesList);
     } catch (error) {
       console.error("Error fetching activities:", error);
@@ -64,7 +85,8 @@ export default function ActivityOverdueScreen() {
     }
     if (searchText.trim() !== '') {
       filtered = filtered.filter(act => act.activityType.toLowerCase().includes(searchText.toLowerCase())||
-      act.date.toLowerCase().includes(searchText.toLowerCase()));
+      act.date.toLowerCase().includes(searchText.toLowerCase())||
+      act.petName.toLowerCase().includes(searchText.toLowerCase()));
     }
     setFilteredActivities(filtered);
   };
@@ -108,7 +130,7 @@ export default function ActivityOverdueScreen() {
               textStyle={{ margin: 6, fontWeight: "bold", textAlign: "center" }}
             />
             <Rows
-              data={filteredActivities.map(act => [act.activityType, act.date, act.startTime, act.endTime])}
+              data={filteredActivities.map(act => [act.petName || "Unknown", act.activityType, act.date, act.startTime, act.endTime])}
               widthArr={columnWidths}
               textStyle={{ margin: 6, textAlign: "center" }}
             />
