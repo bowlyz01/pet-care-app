@@ -7,8 +7,12 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import DropDownPicker from 'react-native-dropdown-picker';
 import BackButton from '../../components/BackButton';
+import { useRoute } from '@react-navigation/native';
+
 
 export default function RemindersDetailsScreen() {
+  const route = useRoute();
+  const { petID } = route.params;
   const [activities, setActivities] = useState([]);
   const [filteredActivities, setFilteredActivities] = useState([]);
   const [searchText, setSearchText] = useState('');
@@ -41,20 +45,32 @@ export default function RemindersDetailsScreen() {
 
   const fetchActivities = async () => {
     try {
-      const q = query(collection(db, "activities"), where("userId", "==", user.uid));
+      if (!user) return; // ตรวจสอบว่าผู้ใช้ล็อกอินหรือไม่
+      if (!petID) return; // ตรวจสอบว่ามี petID หรือไม่
+  
+      // ใช้ Firestore query เพื่อกรอง `userId` และ `status` แทนการกรองเอง
+      const q = query(
+        collection(db, "activities"),
+        where("userId", "==", user.uid),
+        where("status", "!=", "Expired"), // ดึงเฉพาะที่ไม่ใช่ Expired
+        where("petID", "==", petID) // ดึงเฉพาะที่ตรงกับ petID
+      );
+  
       const querySnapshot = await getDocs(q);
-      let activitiesList = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.status !== "Expired") { // Filtering manually
-          activitiesList.push({ id: doc.id, ...data });
-        }
-      });
+  
+      // แปลงผลลัพธ์เป็น array ของ object
+      const activitiesList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+  
       setActivities(activitiesList);
+      console.log("Fetched activities:", activitiesList);
     } catch (error) {
       console.error("Error fetching activities:", error);
     }
   };
+  
   
 
   const applyFilters = () => {
