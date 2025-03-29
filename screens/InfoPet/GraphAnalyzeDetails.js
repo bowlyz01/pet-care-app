@@ -382,16 +382,6 @@ const GraphDetailsScreen = () => {
     fetchData();
   }, [selectedTab, petID]);
   
-  
-  
-
-
-  // // ✅ ข้อมูล Line Chart (Animal Weight Over Years)
-  // const weightData = {
-  //   labels: ["2020", "2021", "2022", "2023", "2024"],
-  //   datasets: [{ data: [5, 10, 15, 20, 25] }]
-  // };
-
 
   return (
     <SafeAreaView className="flex-1 bg-white p-4">
@@ -454,7 +444,7 @@ const GraphDetailsScreen = () => {
 
 
         {/* ✅ Line Chart */}
-        <Text className="text-lg font-semibold text-gray-700 mt-4">Animal Weight Over Years</Text>
+        {/* <Text className="text-lg font-semibold text-gray-700 mt-4">Animal Weight Over Years</Text>
         <LineChart
           data={weightData}
           width={screenWidth - 20}
@@ -468,7 +458,7 @@ const GraphDetailsScreen = () => {
           }}
           bezier
           style={{ marginVertical: 8, borderRadius: 16 }}
-        />
+        /> */}
     </ScrollView>
 
     </SafeAreaView>
@@ -476,8 +466,3 @@ const GraphDetailsScreen = () => {
 };
 
 export default GraphDetailsScreen;
-
-// ฉันมี ตารางที่มีเก็บ activities ทั้งหมด โดยใน bar chart(heart score) ให้ดึงคะแนน ที่มี status 'Finished' โดยให้ดึงวันที่มาจัดว่าเป็น week ไหนและแบบ เดือนปี
-// ส่วน Pie Chart ให้ดึงตาม status  ที่มี
-
-// ส่วน Line Chart จะดึงจาก weights
