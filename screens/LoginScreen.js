@@ -58,9 +58,6 @@ export default function LoginScreen() {
               value={password}
               onChangeText={value=> setPassword(value)}
             />
-            <TouchableOpacity className="flex items-end">
-              <Text className="text-gray-700 mb-5">Forgot Password?</Text>
-            </TouchableOpacity>
             <TouchableOpacity 
               onPress={handleSubmit}
               className="py-3 bg-yellow-400 rounded-xl">
@@ -71,12 +68,6 @@ export default function LoginScreen() {
                 </Text>
              </TouchableOpacity>
             
-          </View>
-          <Text className="text-xl text-gray-700 font-bold text-center py-5">Or</Text>
-          <View className="flex-row justify-center space-x-12">
-            <TouchableOpacity className="p-2 bg-gray-100 rounded-2xl">
-              <Image source={require('../assets/icons/google.png')} className="w-10 h-10" />
-            </TouchableOpacity>
           </View>
           <View className="flex-row justify-center mt-7">
               <Text className="text-gray-500 font-semibold">
