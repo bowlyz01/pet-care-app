@@ -11,6 +11,8 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import EditMenuModal from '../../components/EditMenuModal';
 import { doc, deleteDoc,updateDoc  } from "firebase/firestore";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 const categories = [
   { label: "All", value: "All" },
@@ -131,7 +133,38 @@ const handleDelete = async (docId) => {
     ? documents
     : documents.filter((doc) => doc.category === category);
 
-    
+  useFocusEffect(
+    useCallback(() => {
+      const fetchDocuments = async () => {
+        setLoading(true);
+        try {
+          const q = query(collection(db, "documents"), where("petID", "==", petID));
+          const querySnapshot = await getDocs(q);
+          const docs = await Promise.all(
+            querySnapshot.docs.map(async (doc) => {
+              const data = doc.data();
+              if (data.imagePath) {
+                try {
+                  data.imageUrl = await getPublicImageUrl(data.imagePath);
+                } catch (error) {
+                  console.error("Error fetching image URL:", error);
+                }
+              }
+              return { id: doc.id, ...data };
+            })
+          );
+  
+          setDocuments(docs);
+        } catch (error) {
+          console.error("Error fetching documents:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchDocuments(); 
+    }, [petID])
+  );
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
