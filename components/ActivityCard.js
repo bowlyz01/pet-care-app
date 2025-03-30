@@ -60,16 +60,21 @@ export default function ActivitiesCard({
   useEffect(() => {
     const calculateTime = () => {
       const currentTime = dayjs();
+      const activityType = activityData[name] ? name : "Other"; // ตรวจสอบว่ามีใน activityData ไหม
+  
       const startTime = currentTime.format("HH:mm");
-      const endTime = currentTime.add(activityData[name].duration, "minute").format("HH:mm");
+      const endTime = currentTime.add(activityData[activityType].duration, "minute").format("HH:mm");
+  
       setFormattedStartTime(startTime);
       setFormattedEndTime(endTime);
     };
-
+  
     if (isModalVisible) {
       calculateTime();
     }
   }, [isModalVisible, name]);
+  
+
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -187,7 +192,7 @@ export default function ActivitiesCard({
             Start Activity: {name} for {petName}
           </Text>
           <Text style={styles.modalDescription}>
-            Do you want to start the activity? It will last for {activityData[name].duration} minutes.
+            Do you want to start the activity? It will last for {activityData[name] ? activityData[name].duration : activityData["Other"].duration} minutes.
           </Text>
 
           {/* Start Time */}
