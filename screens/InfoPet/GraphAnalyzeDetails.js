@@ -59,7 +59,7 @@ const getWeeklyHeartScore = async (petID) => {
     );
 
     const querySnapshot = await getDocs(q);
-    const weeklyData = [0, 0, 0, 0]; // เตรียม array สำหรับ 4 สัปดาห์
+    const weeklyData = [0, 0, 0, 0]; 
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
@@ -221,14 +221,14 @@ const getUserStateDistribution = async (petID, selectedTab) => {
     let startDate, endDate;
 
     if (selectedTab === "Weekly" || selectedTab === "Monthly") {
-      startDate = moment().startOf("month"); // เริ่มต้นเดือนปัจจุบัน
-      endDate = moment().endOf("month"); // สิ้นสุดเดือนปัจจุบัน
+      startDate = moment().startOf("month"); 
+      endDate = moment().endOf("month"); 
     } else if (selectedTab === "Yearly") {
-      startDate = moment().startOf("year"); // เริ่มต้นปีปัจจุบัน
-      endDate = moment().endOf("year"); // สิ้นสุดปีปัจจุบัน
+      startDate = moment().startOf("year");
+      endDate = moment().endOf("year"); 
     }
 
-    // ✅ ดึงเฉพาะ petID และ status (ไม่ใช้ date filter)
+    // ✅ ดึงเฉพาะ petID และ status 
     const q = query(
       collection(db, "activities"),
       where("petID", "==", petID)
@@ -287,65 +287,6 @@ const getStatusColor = (status) => {
   return colors[status] || "#CCCCCC";
 };
 
-const getWeightData = async (petID) => {
-  try {
-    const q = query(collection(db, "weights"), where("petID", "==", petID));
-    const querySnapshot = await getDocs(q);
-
-    const weightByYear = {};
-
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      if (!data.weight || !data.date) return;
-
-      const weightDate = data.date.toDate
-        ? moment(data.date.toDate())
-        : moment(data.date, "YYYY-MM-DD");
-
-      const year = weightDate.format("YYYY");
-
-      if (!weightByYear[year]) {
-        weightByYear[year] = { totalWeight: 0, count: 0 };
-      }
-      weightByYear[year].totalWeight += data.weight;
-      weightByYear[year].count += 1;
-    });
-
-    let labels = Object.keys(weightByYear).sort();
-
-    // ✅ ถ้าไม่มีข้อมูลเลย ให้ใช้ปีปัจจุบัน และกำหนดน้ำหนักเป็น 0
-    if (labels.length === 0) {
-      const currentYear = moment().format("YYYY");
-      console.warn(`⚠️ No weight data found for petID: ${petID}`);
-      return { labels: [currentYear], datasets: [{ data: [0] }] };
-    }
-
-    // ✅ ตรวจสอบช่วงปีต่อเนื่อง และเติม 0 ถ้าปีไหนไม่มีข้อมูล
-    const minYear = Math.min(...labels.map(Number));
-    const maxYear = Math.max(...labels.map(Number));
-    labels = Array.from({ length: maxYear - minYear + 1 }, (_, i) =>
-      (minYear + i).toString()
-    );
-
-    const data = labels.map((year) =>
-      weightByYear[year]
-        ? (weightByYear[year].totalWeight / weightByYear[year].count).toFixed(2)
-        : "0"
-    );
-
-    const weightData = {
-      labels,
-      datasets: [{ data: data.map(Number) }],
-    };
-
-    console.log("✅ Weight Data:", weightData);
-    return weightData;
-  } catch (error) {
-    console.error("❌ Error fetching weight data:", error);
-    return { labels: [], datasets: [{ data: [] }] };
-  }
-};
-
 
 const GraphDetailsScreen = () => {
   const route = useRoute();
@@ -353,7 +294,6 @@ const GraphDetailsScreen = () => {
   const [selectedTab, setSelectedTab] = useState("Weekly"); 
   const [heartScoreData, setHeartScoreData] = useState({ labels: [], datasets: [{ data: [] }] });
   const [userStateData, setUserStateData] = useState([]);
-  const [weightData, setWeightData] = useState({ labels: [], datasets: [{ data: [] }] });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -374,9 +314,6 @@ const GraphDetailsScreen = () => {
         ...item,
         population: isNaN(item.population) || item.population === null ? 0 : item.population
       })));
-  
-      const weightData = await getWeightData(petID);
-      setWeightData(sanitizeData(weightData));
     };
   
     fetchData();
@@ -442,23 +379,6 @@ const GraphDetailsScreen = () => {
           absolute
         />
 
-
-        {/* ✅ Line Chart */}
-        {/* <Text className="text-lg font-semibold text-gray-700 mt-4">Animal Weight Over Years</Text>
-        <LineChart
-          data={weightData}
-          width={screenWidth - 20}
-          height={220}
-          chartConfig={{
-            backgroundGradientFrom: "#fff",
-            backgroundGradientTo: "#fff",
-            decimalPlaces: 0,
-            color: (opacity = 1) => `rgba(255, 99, 132, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-          }}
-          bezier
-          style={{ marginVertical: 8, borderRadius: 16 }}
-        /> */}
     </ScrollView>
 
     </SafeAreaView>
