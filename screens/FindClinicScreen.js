@@ -14,8 +14,6 @@ export default function FindClinicScreen() {
   const navigation = useNavigation();
   const apiKey = Constants.expoConfig.extra.googleApiKey;
 
-  console.log('Google API Key:', apiKey);
-
 
   
 
