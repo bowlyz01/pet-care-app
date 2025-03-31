@@ -121,6 +121,7 @@ export default function ActivityOverdueScreen() {
       </View>
 
       <ScrollView horizontal>
+        <ScrollView style={{ flex: 1 }} scrollEnabled={true}>
         <View>
           <Table borderStyle={{ borderWidth: 1, borderColor: "#C1C0B9" }}>
             <Row
@@ -136,6 +137,7 @@ export default function ActivityOverdueScreen() {
             />
           </Table>
         </View>
+      </ScrollView>
       </ScrollView>
     </SafeAreaView>
   );
