@@ -16,6 +16,7 @@ const storage = getStorage(app);
 export default function PetOwnerDetailsScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState({ username: '', name: '', phone: '', altPhone: '', profileImage: null });
+  const [originalData, setOriginalData] = useState({});
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -23,7 +24,9 @@ export default function PetOwnerDetailsScreen() {
       if (user) {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
-          setUserData(userDoc.data());
+          const data = userDoc.data();
+          setUserData(data);
+          setOriginalData(data);
         } else {
           setUserData({ username: user.displayName || '', name: '', phone: '', altPhone: '', profileImage: null });
         }
@@ -42,7 +45,15 @@ export default function PetOwnerDetailsScreen() {
   }, []);
   
 
-  const handleEdit = () => setIsEditing(true);
+  const handleEdit = () => {
+    setOriginalData(userData); // Save current data before editing
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setUserData(originalData); // Reset data to the original state
+    setIsEditing(false);
+  };
   
   const handleSave = async () => {
     const user = auth.currentUser;
@@ -67,6 +78,7 @@ export default function PetOwnerDetailsScreen() {
   
       // บันทึกข้อมูลไปยัง Firestore
       await setDoc(doc(db, 'users', user.uid), userData, { merge: true });
+      setOriginalData(userData);
       setIsEditing(false);
     }
   };
@@ -184,10 +196,15 @@ export default function PetOwnerDetailsScreen() {
       </View>
 
       <View className="flex-row justify-center space-x-4 mt-6">
-        {isEditing ? (
-          <TouchableOpacity className="border border-black px-6 py-2 rounded-lg bg-white" onPress={handleSave}>
-            <Text className="text-black font-semibold">Save</Text>
-          </TouchableOpacity>
+      {isEditing ? (
+          <>
+            <TouchableOpacity className="border border-black px-6 py-2 rounded-lg bg-white" onPress={handleSave}>
+              <Text className="text-black font-semibold">Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity className="border border-black px-6 py-2 rounded-lg bg-gray-300" onPress={handleCancel}>
+              <Text className="text-black font-semibold">Cancel</Text>
+            </TouchableOpacity>
+          </>
         ) : (
           <TouchableOpacity className="border border-black px-6 py-2 rounded-lg bg-white" onPress={handleEdit}>
             <Text className="text-black font-semibold">Edit</Text>
