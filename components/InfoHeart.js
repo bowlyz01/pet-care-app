@@ -5,6 +5,7 @@ import { db } from "../config/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import dayjs from "dayjs";
+import { getTotalHeartScore } from "../utils/heartScoreUtils";
 
 export default function InfoHeart({ petID }) {
   const navigation = useNavigation();
@@ -21,31 +22,11 @@ export default function InfoHeart({ petID }) {
   const handlePress = () => {
     navigation.navigate('PetDailyPoints', { petID });
   };
-
   const fetchHeartScore = async () => {
-    try {
-      const today = dayjs().format("YYYY-MM-DD");
-      const q = query(
-        collection(db, "activities"),
-        where("userId", "==", user.uid),
-        where("petID", "==", petID),
-        where("date", "==", today),
-        where("status", "==", "Finished")
-      );
-      
-      const querySnapshot = await getDocs(q);
-      let totalScore = 0;
-
-      querySnapshot.forEach((doc) => {
-        const heartScore = parseInt(doc.data().heartScore, 10) || 0;
-        totalScore += heartScore;
-      });
-
-      setTotalHeartScore(totalScore);
-    } catch (error) {
-      console.error("Error fetching heart score:", error);
-    }
+    const score = await getTotalHeartScore(user.uid, petID);
+    setTotalHeartScore(score);
   };
+
 
   return (
     <TouchableOpacity onPress={handlePress} style={styles.container}>
