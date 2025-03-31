@@ -12,20 +12,26 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = async ()=>{
-      if(email && password){
-          try{
-              await signInWithEmailAndPassword(auth, email, password);
-          }catch(err){
-              console.log('got error: ',err.message);
-              let msg = err.message;
-              if(msg.includes('invalid-login-credentials')) msg = "Invalid credentials";
-              if (msg.includes('auth/invalid-credential')) msg = "Invalid email or password";
-              if(msg.includes('auth/invalid-email')) msg = "Invalid email";
-              Alert.alert('Sign In', msg);
-          }
-      }
-  }
+  const handleSubmit = async () => {
+    if (!email || !password) {
+        Alert.alert('Error', 'Please enter both email and password');
+        return;
+    }
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+        console.log('got error: ', err.message);
+        let msg = err.message;
+
+        if (msg.includes('invalid-login-credentials')) msg = "Invalid email or password";
+        if (msg.includes('auth/invalid-credential')) msg = "Invalid email or password";
+        if (msg.includes('auth/invalid-email')) msg = "Invalid email format";
+
+        Alert.alert('Sign In Failed', msg);
+    }
+};
+
   return (
     <View className="flex-1 bg-white" style={{backgroundColor: themeColors.bg}}>
       <SafeAreaView  className="flex ">
