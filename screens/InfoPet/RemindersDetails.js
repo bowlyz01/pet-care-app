@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Table, Row, Rows } from 'react-native-table-component';
 import { db } from '../../config/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs,doc,getDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import DropDownPicker from 'react-native-dropdown-picker';
 import BackButton from '../../components/BackButton';
@@ -18,6 +18,7 @@ export default function RemindersDetailsScreen() {
   const [searchText, setSearchText] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [open, setOpen] = useState(false);
+  const [petName, setPetName] = useState('');
   const [items, setItems] = useState([
     { label: 'All', value: 'All' },
     { label: 'Walking', value: 'Walking' },
@@ -40,8 +41,34 @@ export default function RemindersDetailsScreen() {
   }, [user]);
 
   useEffect(() => {
+    console.log("petID from route:", petID); // ตรวจสอบค่า petID
+    if (petID) {
+      fetchPetName();
+    }
+  }, [petID]);
+  
+
+  useEffect(() => {
     applyFilters();
   }, [activities, searchText, selectedFilter]);
+
+  const fetchPetName = async () => {
+    try {
+      if (!petID) return;
+  
+      const petRef = doc(db, "pets", petID); // ดึงข้อมูลจาก document ID
+      const petSnap = await getDoc(petRef);
+  
+      if (petSnap.exists()) {
+        setPetName(petSnap.data().name);
+        console.log("Pet Name:", petSnap.data().name);
+      } else {
+        console.log("No pet found with this petID.");
+      }
+    } catch (error) {
+      console.error("Error fetching pet name:", error);
+    }
+  };
 
   const fetchActivities = async () => {
     try {
@@ -89,7 +116,7 @@ export default function RemindersDetailsScreen() {
     <SafeAreaView className="flex-1 bg-white p-4">
       <View className="flex-row justify-between items-center">
         <BackButton />
-        <Text className="text-xl font-bold">Activities</Text>
+        <Text className="text-xl font-bold">Activities's {petName || 'Loading...'}</Text>
       </View>
 
       {/* Search & Filter */}
