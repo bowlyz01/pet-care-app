@@ -67,7 +67,7 @@ const PetCard = ({ pet }) => {
       <InfoBlock label="Vaccinations" screenName="VaccinationsDetails" petID={pet.id}/>
         {/* ยังไม่ได้ทำ graph,health info,contacts */}
         <InfoBlock label="Graph Analyze" screenName="GraphAnalyzeDetails" petID={pet.id}/> 
-        <InfoBlock label="Reminders" screenName="RemindersDetails" petID={pet.id}/>
+        <InfoBlock label="History Activities" screenName="RemindersDetails" petID={pet.id}/>
         <InfoBlock label="Health Info" screenName="HealthDetails" petID={pet.id}/> 
         <InfoBlock label="QR Code" screenName="PetQRCode" petID={pet.id}/> 
       </View>
