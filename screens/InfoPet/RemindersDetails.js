@@ -142,6 +142,7 @@ export default function RemindersDetailsScreen() {
       </View>
 
       <ScrollView horizontal>
+      <ScrollView style={{ flex: 1 }} scrollEnabled={true}>
         <View>
           <Table borderStyle={{ borderWidth: 1, borderColor: "#C1C0B9" }}>
             <Row
@@ -157,6 +158,7 @@ export default function RemindersDetailsScreen() {
             />
           </Table>
         </View>
+        </ScrollView>
       </ScrollView>
     </SafeAreaView>
   );
