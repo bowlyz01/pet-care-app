@@ -6,9 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "extra": {
-      "googleApiKey": "AIzaSyB4SJqiWxETiPH_LAWPsFp2eNuj5mwxldI"
-    },
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
